@@ -4,551 +4,1264 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Grupo Educativo CNCM</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     colors: {
-                        cncmBlue: '#0B3B60',
-                        cncmRed: '#D32F2F',
+                        cncm: {
+                            blue: '#0B3B60',
+                            red: '#D32F2F',
+                            dark: '#111827',
+                            light: '#F8FAFC',
+                            accent: '#1E40AF'
+                        }
                     }
                 }
             }
         }
     </script>
-    <!-- SheetJS & jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f1f5f9; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .ios-container { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+            color: #111827;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .app-frame {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100vh !important;
+                position: static !important;
+                overflow: visible !important;
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-200 flex justify-center items-start min-h-screen">
+<body class="flex justify-center items-center min-h-screen bg-slate-200 p-0 sm:p-4">
 
-<div class="ios-container flex flex-col">
-    <!-- Header Institucional -->
-    <header class="bg-cncmBlue text-white p-4 shadow-md sticky top-0 z-30">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center w-11 h-11">
-                    <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="max-h-9 max-w-9 object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230B3B60\'/><text x=\'50\' y=\'60\' font-size=\'40\' fill=\'white\' text-anchor=\'middle\' font-family=\'Arial\'>CNCM</text></svg>';">
-                </div>
-                <div>
-                    <h1 class="font-bold text-sm leading-tight">Grupo Educativo CNCM</h1>
-                    <p class="text-[11px] text-slate-200">Control de Inscripciones</p>
-                </div>
-            </div>
-            <div class="bg-cncmRed text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
-                Semana <span id="currentWeekNum">40</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- Pestañas de Navegación -->
-    <nav class="bg-white border-b border-slate-200 flex justify-around p-1 shadow-sm sticky top-[68px] z-20">
-        <button onclick="switchTab('pendientes')" id="tab-pendientes" class="flex-1 py-2 text-center text-xs font-semibold text-cncmBlue border-b-2 border-cncmBlue transition">
-            <i class="fa-solid fa-clock-rotate-left mb-0.5 block text-sm"></i>Pendientes
-        </button>
-        <button onclick="switchTab('registros')" id="tab-registros" class="flex-1 py-2 text-center text-xs font-semibold text-slate-400 border-b-2 border-transparent transition">
-            <i class="fa-solid fa-user-plus mb-0.5 block text-sm"></i>Registros
-        </button>
-        <button onclick="switchTab('reportes')" id="tab-reportes" class="flex-1 py-2 text-center text-xs font-semibold text-slate-400 border-b-2 border-transparent transition">
-            <i class="fa-solid fa-chart-pie mb-0.5 block text-sm"></i>Reportes
-        </button>
-    </nav>
-
-    <!-- Contenido Principal -->
-    <main class="flex-1 p-4 overflow-y-auto pb-20">
-
-        <!-- PENDIENTES -->
-        <section id="section-pendientes" class="space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Gestión de Prospectos</h2>
-                <div class="flex space-x-2">
-                    <button onclick="exportPendientesPDF()" class="bg-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg font-medium shadow hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-file-pdf mr-1"></i>PDF
-                    </button>
-                    <button onclick="openPendienteModal()" class="bg-cncmRed text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow hover:bg-red-700 transition">
-                        <i class="fa-solid fa-plus mr-1"></i>Nuevo
-                    </button>
-                </div>
-            </div>
-            <div id="pendientesList" class="space-y-3"></div>
-        </section>
-
-        <!-- REGISTROS -->
-        <section id="section-registros" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Nuevo Registro</h2>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Semana: <strong id="formWeekDisplay">40</strong></span>
-                </div>
-                
-                <form id="registroForm" onsubmit="handleAddRegistro(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Sección / Tipo de Registro</label>
-                        <select id="regSeccion" onchange="toggleRolInput()" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none" required>
-                            <option value="Módulo">Módulo</option>
-                            <option value="Reinscrito">Reinscrito</option>
-                            <option value="Otros">Otros</option>
-                        </select>
-                    </div>
-
-                    <div id="otroRolContainer" class="hidden">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Especificar Otro Rol / Tipo</label>
-                        <input type="text" id="regOtroRol" placeholder="Ej. Promoción especial" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Control / ID</label>
-                            <input type="text" id="regControl" placeholder="Ej. 12677" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rol / Tipo Asignado</label>
-                            <input type="text" id="regRolTipo" placeholder="Ej. GERENTE" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Completo del Alumno</label>
-                        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Curso</label>
-                        <select id="regCurso" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
-                            <option value="Especialidad de inglés">Especialidad de inglés</option>
-                            <option value="Especialidad en computación">Especialidad en computación</option>
-                            <option value="Curso kids (inglés y computación)">Curso kids (inglés y computación)</option>
-                            <option value="Prepa Abierta">Prepa Abierta</option>
-                            <option value="Prepa escolarizada">Prepa escolarizada</option>
-                            <option value="Curso personalizado: Excel básico">Curso personalizado: Excel básico</option>
-                            <option value="Curso personalizado: Ingles">Curso personalizado: Ingles</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="w-full bg-cncmBlue text-white text-xs font-bold py-3 rounded-lg shadow hover:bg-sky-900 transition flex items-center justify-center">
-                        <i class="fa-solid fa-save mr-1.5"></i> Guardar Registro
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- REPORTES -->
-        <section id="section-reportes" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Reportes y Estadísticas</h2>
-                <button onclick="resetReporteVisual()" class="text-[11px] text-slate-500 hover:text-cncmRed underline">
-                    <i class="fa-solid fa-rotate-right mr-1"></i>Limpiar Vista Reporte
-                </button>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-slate-700 uppercase" id="currentReportTitle">Registros (Semana Actual)</h3>
-                    <span id="mesTotalCount" class="text-xs bg-cncmBlue text-white px-2 py-0.5 rounded-full font-bold">0 registros</span>
-                </div>
-                <div id="mesDesgloseList" class="space-y-2 pt-1 text-xs text-slate-600"></div>
-                <div class="pt-2 flex space-x-2">
-                    <button onclick="exportMonthlyPDF()" class="flex-1 bg-cncmRed text-white text-xs py-2 rounded-lg font-semibold shadow hover:bg-red-700 transition">
-                        <i class="fa-solid fa-file-pdf mr-1"></i> PDF Reporte
-                    </button>
-                </div>
-            </div>
-
-            <!-- Botón Ver Historial -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <h3 class="text-xs font-bold text-slate-700 uppercase">Historial de Inscripciones</h3>
-                <p class="text-xs text-slate-500">Consulta todo el acumulado histórico y descarga respaldos oficiales.</p>
-                <button onclick="openHistorialModal()" class="w-full bg-cncmBlue text-white text-xs font-bold py-2.5 rounded-lg shadow hover:bg-sky-900 transition flex items-center justify-center">
-                    <i class="fa-solid fa-list-check mr-2"></i> Ver Historial
-                </button>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- MODAL PENDIENTE -->
-    <div id="pendienteModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-xs text-slate-800 uppercase">Nuevo Prospecto Pendiente</h3>
-                <button onclick="closePendienteModal()" class="text-slate-400"><i class="fa-solid fa-xmark text-base"></i></button>
-            </div>
-            <form onsubmit="handleSavePendiente(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
-                    <input type="text" id="pendNombre" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
-                    <input type="text" id="pendTel" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Curso</label>
-                    <input type="text" id="pendCurso" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Observaciones</label>
-                    <textarea id="pendNotas" class="w-full text-xs p-2 rounded-lg border border-slate-300" rows="2"></textarea>
-                </div>
-                <button type="submit" class="w-full bg-cncmRed text-white text-xs font-bold py-2.5 rounded-lg shadow">Guardar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL VER HISTORIAL -->
-    <div id="historialModal" class="fixed inset-0 bg-black/50 z-50 hidden flex flex-col justify-end">
-        <div class="bg-white w-full max-h-[90vh] rounded-t-2xl p-4 shadow-2xl flex flex-col space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-sm text-slate-800 uppercase">Historial de Registros</h3>
-                <button onclick="closeHistorialModal()" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="flex space-x-2">
-                <select id="filtroSemana" onchange="renderHistorialTable()" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-slate-50">
-                    <option value="">Todas las Semanas (Histórico)</option>
-                    <option value="36">Semana 36</option>
-                    <option value="37">Semana 37</option>
-                    <option value="38">Semana 38</option>
-                    <option value="39" selected>Semana 39</option>
-                    <option value="40">Semana 40</option>
-                </select>
-                <button onclick="exportHistorialExcel()" class="bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-bold shadow"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
-                <button onclick="exportHistorialPDF()" class="bg-cncmRed text-white text-xs px-3 py-2 rounded-lg font-bold shadow"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
-            </div>
-            <div class="flex-1 overflow-y-auto border rounded-lg p-2 max-h-[50vh]">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 border-b">
-                            <th class="p-1.5">Sem</th>
-                            <th class="p-1.5">Control</th>
-                            <th class="p-1.5">Nombre</th>
-                            <th class="p-1.5">Tipo</th>
-                            <th class="p-1.5">Curso</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historialTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bg-white border-t border-slate-200 py-3 text-center text-[10px] text-slate-400">
-        Grupo Educativo CNCM &copy; 2026
-    </footer>
-</div>
-
-<script>
-    function getISOWeek(date) {
-        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-    }
-
-    const currentWeek = getISOWeek(new Date());
-    document.getElementById('currentWeekNum').innerText = currentWeek;
-    document.getElementById('formWeekDisplay').innerText = currentWeek;
-
-    // Historial completo hasta semana 39 integrado
-    let registros = JSON.parse(localStorage.getItem('cncm_registros')) || [
-        {seccion: "Reinscrito", control: "10352", nombre: "ALLISON JANETTE VAZQUEZ SANCHEZ", curso: "Especialidad de inglés", rolTipo: "RECEP", semana: 39},
-        {seccion: "Módulo", control: "12676", nombre: "Jesus Trinidad Morales Acosta", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12675", nombre: "Maria Valentina Cuevas Martinez", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12673", nombre: "JOSE MARIA VILLICAÑA RODRIGUEZ", curso: "Prepa Abierta", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12674", nombre: "Maria Arely Mireles Robles", curso: "Curso personalizado: Excel básico", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12672", nombre: "Jesus Isaac Mendez Garcia", curso: "Prepa Abierta", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12671", nombre: "Judith Pamela Muñoz Lopez", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
-        {seccion: "Módulo", control: "12670", nombre: "Viri Diana Negrete Collazo", curso: "Especialidad en computación", rolTipo: "EMMANUEL ZOTICO", semana: 38},
-        {seccion: "Módulo", control: "12669", nombre: "Ruben Alejandro Aguilar Alfaro", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 38},
-        {seccion: "Módulo", control: "12668", nombre: "Dylan González Montenegro", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 38},
-        {seccion: "Módulo", control: "12667", nombre: "María Soledad Celaya Celedon", curso: "Especialidad en computación", rolTipo: "GERENTE", semana: 38},
-        {seccion: "Módulo", control: "12666", nombre: "Esther Jacqueline Ruiz Galdeano", curso: "Especialidad en computación", rolTipo: "WENDY MARISSA", semana: 38},
-        {seccion: "Módulo", control: "12665", nombre: "Areli Guadalupe Ramirez Gonzalez", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 37},
-        {seccion: "Reinscrito", control: "11694", nombre: "Yamil Uriel Perez Morales", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 37},
-        {seccion: "Módulo", control: "12664", nombre: "José Carlos Loredo Muñoz", curso: "Especialidad de inglés", rolTipo: "EMMANUEL ZOTICO", semana: 37},
-        {seccion: "Módulo", control: "12663", nombre: "Maximiliano Loredo Muñoz", curso: "Especialidad de inglés", rolTipo: "EMMANUEL ZOTICO", semana: 37},
-        {seccion: "Módulo", control: "12662", nombre: "Jimena Arredondo Contreras", curso: "Prepa Abierta", rolTipo: "CRM RICARDO", semana: 36},
-        {seccion: "Módulo", control: "12661", nombre: "José Silva Muñoz", curso: "Especialidad en computación", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12660", nombre: "Mia Aylin Sierra Capetillo", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12659", nombre: "Ariana Yaretzi Sierra Capetillo", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12658", nombre: "Nora Lemus Alcaraz", curso: "Especialidad en computación", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12657", nombre: "Melissa Aguilera Lomas", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12656", nombre: "Abigail Cardoso Cruz", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12655", nombre: "Andrea Fidel Teofilo", curso: "Especialidad de inglés", rolTipo: "EMMANUEL ZOTICO", semana: 36},
-        {seccion: "Módulo", control: "12654", nombre: "Alicia Muñoz Olivares", curso: "Especialidad en computación", rolTipo: "EMMANUEL ZOTICO", semana: 36},
-        {seccion: "Módulo", control: "12252", nombre: "Danna Amayrani Aboytes Garcia", curso: "Prepa escolarizada", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12653", nombre: "David Antonio Rodriguez Sanchez", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12652", nombre: "Juan Pablo Rodriguez Sanchez", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12651", nombre: "Cynthia Ramirez Delgado", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36}
-    ];
-
-    // Pendientes integrados de la semana 39
-    let pendientes = JSON.parse(localStorage.getItem('cncm_pendientes')) || [
-        {id: 1, nombre: "Maria alfaro", tel: "4641089825", curso: "Curso kids (inglés y computación)", notas: "INFORME | GERENTE"},
-        {id: 2, nombre: "Julian Vidal Garcia", tel: "4774013824", curso: "Curso kids (inglés y computación)", notas: "INFORME | GERENTE"},
-        {id: 3, nombre: "Selene hija", tel: "4641168469", curso: "Curso kids (inglés y computación)", notas: "ABORDAR | GERENTE"},
-        {id: 4, nombre: "Jesus Trinidad Morales Acosta", tel: "4642133988", curso: "Especialidad en inglés", notas: "ABORDAR | GERENTE"},
-        {id: 5, nombre: "A", tel: "4646466250", curso: "Curso personalizado: Ingles", notas: "INFORME | GERENTE"},
-        {id: 6, nombre: "Maria Alely Mireles robles", tel: "4776702836", curso: "Curso personalizado: Excel básico", notas: "INFORME | GERENTE"},
-        {id: 7, nombre: "Paula", tel: "4646528151", curso: "Especialidad en inglés", notas: "INFORME | GERENTE"},
-        {id: 8, nombre: "Ana", tel: "4641296612", curso: "Especialidad en inglés", notas: "ABORDAR | GERENTE"}
-    ];
-
-    function saveData() {
-        localStorage.setItem('cncm_registros', JSON.stringify(registros));
-        localStorage.setItem('cncm_pendientes', JSON.stringify(pendientes));
-        updateReports();
-    }
-
-    function switchTab(tab) {
-        ['pendientes', 'registros', 'reportes'].forEach(t => {
-            document.getElementById(`section-${t}`).classList.add('hidden');
-            document.getElementById(`tab-${t}`).classList.remove('text-cncmBlue', 'border-cncmBlue');
-            document.getElementById(`tab-${t}`).classList.add('text-slate-400', 'border-transparent');
-        });
-        document.getElementById(`section-${tab}`).classList.remove('hidden');
-        document.getElementById(`tab-${tab}`).classList.add('text-cncmBlue', 'border-cncmBlue');
-        document.getElementById(`tab-${tab}`).classList.remove('text-slate-400', 'border-transparent');
-        if(tab === 'reportes') updateReports();
-        if(tab === 'pendientes') renderPendientes();
-    }
-
-    function toggleRolInput() {
-        const val = document.getElementById('regSeccion').value;
-        const container = document.getElementById('otroRolContainer');
-        if(val === 'Otros') container.classList.remove('hidden');
-        else container.classList.add('hidden');
-    }
-
-    function handleAddRegistro(e) {
-        e.preventDefault();
-        let seccion = document.getElementById('regSeccion').value;
-        if(seccion === 'Otros') {
-            seccion = document.getElementById('regOtroRol').value || 'Otros';
-        }
-        const nuevo = {
-            seccion: seccion,
-            control: document.getElementById('regControl').value,
-            nombre: document.getElementById('regNombre').value,
-            curso: document.getElementById('regCurso').value,
-            rolTipo: document.getElementById('regRolTipo').value,
-            semana: currentWeek
-        };
-        registros.unshift(nuevo);
-        saveData();
-        document.getElementById('registroForm').reset();
-        switchTab('reportes');
-        alert('¡Registro guardado con éxito!');
-    }
-
-    function renderPendientes() {
-        const list = document.getElementById('pendientesList');
-        list.innerHTML = '';
-        if(pendientes.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay prospectos pendientes.</p>';
-            return;
-        }
-        pendientes.forEach((p, idx) => {
-            list.innerHTML += `
-                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center text-xs">
-                    <div>
-                        <p class="font-bold text-slate-800">${p.nombre}</p>
-                        <p class="text-slate-500"><i class="fa-solid fa-phone mr-1"></i>${p.tel} | ${p.curso}</p>
-                        <p class="text-slate-400 italic">${p.notas}</p>
-                    </div>
-                    <button onclick="deletePendiente(${idx})" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `;
-        });
-    }
-
-    function openPendienteModal() { document.getElementById('pendienteModal').classList.remove('hidden'); }
-    function closePendienteModal() { document.getElementById('pendienteModal').classList.add('hidden'); }
-
-    function handleSavePendiente(e) {
-        e.preventDefault();
-        const nuevo = {
-            id: Date.now(),
-            nombre: document.getElementById('pendNombre').value,
-            tel: document.getElementById('pendTel').value,
-            curso: document.getElementById('pendCurso').value,
-            notas: document.getElementById('pendNotas').value
-        };
-        pendientes.push(nuevo);
-        saveData();
-        closePendienteModal();
-        renderPendientes();
-    }
-
-    function deletePendiente(idx) {
-        pendientes.splice(idx, 1);
-        saveData();
-        renderPendientes();
-    }
-
-    function updateReports() {
-        const regsSemanaActual = registros.filter(r => r.semana == currentWeek);
-        document.getElementById('currentReportTitle').innerText = `Registros (Semana ${currentWeek} - Actual)`;
-        document.getElementById('mesTotalCount').innerText = `${regsSemanaActual.length} registros`;
+    <div class="app-frame w-full sm:max-w-[420px] h-screen sm:h-[860px] bg-slate-50 sm:rounded-[50px] sm:shadow-2xl sm:border-[10px] sm:border-slate-800 flex flex-col overflow-hidden relative">
         
-        const desglose = {};
-        regsSemanaActual.forEach(r => {
-            desglose[r.seccion] = (desglose[r.seccion] || 0) + 1;
-        });
+        <!-- Dynamic Island / Header Notch -->
+        <div class="no-print hidden sm:flex absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-2xl z-50 justify-center items-center">
+            <div class="w-3 h-3 bg-black rounded-full mr-3"></div>
+            <div class="w-2 h-2 bg-slate-900 rounded-full"></div>
+        </div>
 
-        const container = document.getElementById('mesDesgloseList');
-        container.innerHTML = '';
-        if(Object.keys(desglose).length === 0) {
-            container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No hay registros nuevos en esta semana todavía.</p>';
-            return;
-        }
-        for (const [key, val] of Object.entries(desglose)) {
-            container.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
-                    <span class="font-semibold text-slate-700">${key}</span>
-                    <span class="font-bold text-cncmBlue">${val} registros</span>
+        <!-- Top Header Bar -->
+        <header class="pt-10 sm:pt-12 px-5 pb-4 bg-white border-b border-gray-200 flex justify-between items-center z-20 shrink-0">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1 border border-blue-100">
+                    <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://www.cncm.edu.mx/images/logo.png'; this.onerror=function(){this.parentElement.innerHTML='<span class=\'text-[10px] font-black text-cncm-blue\'>CNCM</span>';};">
                 </div>
-            `;
+                <div>
+                    <h1 id="app-title" class="text-sm font-black tracking-tight text-cncm-blue uppercase">Grupo Educativo CNCM</h1>
+                    <p id="app-subtitle" class="text-[11px] text-slate-500 font-medium">Sistema de Control y Reportes</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-1.5">
+                <button onclick="goHome()" id="home-icon-btn" class="hidden text-cncm-blue p-2 rounded-xl bg-blue-50 hover:bg-blue-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+            
+            <!-- VIEW: MENU -->
+            <div id="view-menu" class="space-y-4 py-4">
+                <div class="text-center space-y-2 mb-4">
+                    <div class="w-24 h-24 bg-white text-cncm-blue rounded-3xl mx-auto flex items-center justify-center shadow-md border border-blue-100 p-3 overflow-hidden">
+                        <img src="https://www.cncm.edu.mx/img/logo.png" alt="Grupo Educativo CNCM" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://www.cncm.edu.mx/images/logo.png'; this.onerror=function(){this.parentElement.innerHTML='<span class=\'text-xs font-black text-cncm-blue\'>CNCM</span>';};">
+                    </div>
+                    <h2 class="text-xl font-extrabold text-cncm-blue">Panel Institucional</h2>
+                    <p class="text-xs text-slate-500">Seleccione el módulo requerido</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3.5 max-w-xs mx-auto">
+                    <!-- Botón Pendientes -->
+                    <button onclick="switchView('pendientes')" class="w-full py-3.5 px-5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold shadow-lg shadow-orange-500/20 flex items-center justify-between active:scale-95 transition">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-sm block font-extrabold">Pendientes</span>
+                                <span id="menu-pendientes-count" class="text-[11px] text-orange-100 font-medium">0 prospectos</span>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- Botón Registros -->
+                    <button onclick="switchView('registros')" class="w-full py-3.5 px-5 bg-gradient-to-r from-cncm-blue to-blue-900 text-white rounded-2xl font-bold shadow-lg shadow-blue-900/20 flex items-center justify-between active:scale-95 transition">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-sm block font-extrabold">Registros</span>
+                                <span id="menu-registros-count" class="text-[11px] text-blue-100 font-medium">0 inscritos diarios</span>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- Botón Reporte Semanal -->
+                    <button onclick="switchView('reporte')" class="w-full py-3.5 px-5 bg-gradient-to-r from-cncm-red to-red-700 text-white rounded-2xl font-bold shadow-lg shadow-red-600/20 flex items-center justify-between active:scale-95 transition">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-sm block font-extrabold">Reporte Semanal</span>
+                                <span class="text-[11px] text-red-100 font-medium">Metas y Dashboard PDF</span>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- Botón Ver Historial -->
+                    <button onclick="openHistorialModal()" class="w-full py-3.5 px-5 bg-white text-cncm-blue rounded-2xl font-bold shadow-sm flex items-center justify-center space-x-2 active:scale-95 transition border border-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cncm-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs font-bold">Ver Historial</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW: PENDIENTES -->
+            <div id="view-pendientes" class="space-y-4 hidden">
+                <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-gray-100">
+                    <button onclick="goHome()" class="flex items-center space-x-1 text-cncm-blue font-bold text-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Menú Principal</span>
+                    </button>
+                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Módulo Pendientes</span>
+                </div>
+
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-xs">P</div>
+                            <h2 class="font-bold text-xs text-slate-800">Registro de Prospecto</h2>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 bg-orange-50 text-orange-600 rounded-full font-bold">Seguimiento</span>
+                    </div>
+
+                    <form id="form-pendiente-unificado" onsubmit="handlePendienteSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre del Prospecto</label>
+                            <input type="text" name="nombre" required placeholder="Ej. Roberto Gómez" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Número Telefónico</label>
+                            <input type="tel" name="telefono" required placeholder="4611234567" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Curso de su Interés</label>
+                            <select name="curso" id="select-curso-pendiente" onchange="handleCursoChange(this, 'custom-curso-container')" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                <option value="">Seleccionar curso...</option>
+                                <option value="Prepa Abierta">Prepa Abierta</option>
+                                <option value="Prepa escolarizada">Prepa escolarizada</option>
+                                <option value="Especialidad en inglés">Especialidad en inglés</option>
+                                <option value="Especialidad en computación">Especialidad en computación</option>
+                                <option value="Curso kids (inglés y computación)">Curso kids (inglés y computación)</option>
+                                <option value="Curso kids extensivo">Curso kids extensivo</option>
+                                <option value="Curso personalizado">Curso personalizado</option>
+                                <option value="Robótica">Robótica</option>
+                            </select>
+                        </div>
+                        <div id="custom-curso-container" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Especifique la Materia</label>
+                            <input type="text" name="cursoPersonalizado" placeholder="Ej. Excel básico" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo de Atención</label>
+                                <select name="tipoAtencion" required class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                    <option value="INFORME">INFORME (llega solo)</option>
+                                    <option value="ABORDAR">ABORDAR (invitación)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Atendido Por</label>
+                                <select name="rol" required class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                    <option value="ASESOR">ASESOR</option>
+                                    <option value="GERENTE">GERENTE</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition">Guardar en Pendientes</button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-xs text-slate-800">Prospectos Pendientes</h3>
+                        <div class="flex items-center space-x-2">
+                            <span id="badge-pendientes-total" class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-bold">0 en total</span>
+                            <button onclick="exportPendientesPDF()" class="py-1 px-2.5 bg-cncm-red text-white rounded-xl text-[10px] font-bold flex items-center space-x-1 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="pendientes-list-container" class="space-y-2 max-h-48 overflow-y-auto">
+                        <p class="text-xs text-slate-400 text-center py-4">No hay prospectos pendientes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: REGISTROS -->
+            <div id="view-registros" class="space-y-4 hidden">
+                <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-gray-100">
+                    <button onclick="goHome()" class="flex items-center space-x-1 text-cncm-blue font-bold text-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Menú Principal</span>
+                    </button>
+                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Módulo Registros</span>
+                </div>
+
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-xl bg-blue-50 text-cncm-blue flex items-center justify-center font-bold text-xs">R</div>
+                            <h2 class="font-bold text-xs text-slate-800">Nueva Inscripción / Registro</h2>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 bg-blue-50 text-cncm-blue rounded-full font-bold">Activo</span>
+                    </div>
+                    <form id="form-registro" onsubmit="handleRegistroSubmit(event)" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">No. de Control</label>
+                                <input type="text" name="control" required placeholder="Ej. 12677" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo de Registro</label>
+                                <select name="tipoRegistro" required class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                    <option value="Módulo">Módulo</option>
+                                    <option value="Reinscrito">Reinscrito</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre del Alumno</label>
+                            <input type="text" name="nombre" required placeholder="Ej. Carlos Mendoza" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Especialidad o Curso</label>
+                            <select name="curso" id="select-curso-registro" onchange="handleCursoChange(this, 'custom-curso-registro-container')" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                <option value="">Seleccionar curso...</option>
+                                <option value="Prepa Abierta">Prepa Abierta</option>
+                                <option value="Prepa escolarizada">Prepa escolarizada</option>
+                                <option value="Especialidad en inglés">Especialidad en inglés</option>
+                                <option value="Especialidad en computación">Especialidad en computación</option>
+                                <option value="Curso kids (inglés y computación)">Curso kids (inglés y computación)</option>
+                                <option value="Curso kids extensivo">Curso kids extensivo</option>
+                                <option value="Curso personalizado">Curso personalizado</option>
+                                <option value="Robótica">Robótica</option>
+                            </select>
+                        </div>
+                        <div id="custom-curso-registro-container" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Especifique la Materia</label>
+                            <input type="text" name="cursoPersonalizado" placeholder="Ej. Excel básico" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Responsable</label>
+                            <select name="rol" id="select-rol-registro" onchange="handleRolChange(this)" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                                <option value="GERENTE">GERENTE</option>
+                                <option value="ASESOR">ASESOR</option>
+                                <option value="OTRO">OTROS</option>
+                            </select>
+                        </div>
+                        <div id="custom-rol-container" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">¿Quién realizó el registro?</label>
+                            <input type="text" name="rolPersonalizado" placeholder="Nombre o área" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-cncm-blue">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-cncm-blue text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition">Guardar Inscripción</button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-xs text-slate-800">Inscripciones (Semana <span id="display-table-week">40</span>)</h3>
+                        <span id="badge-total-registros" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">0 inscritos</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-48 rounded-xl border border-gray-100">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b border-gray-200">
+                                    <th class="p-2 font-bold">Control</th>
+                                    <th class="p-2 font-bold">Tipo</th>
+                                    <th class="p-2 font-bold">Alumno</th>
+                                    <th class="p-2 font-bold">Curso</th>
+                                    <th class="p-2 font-bold">Resp.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sheets-table-body" class="divide-y divide-gray-100 text-slate-800">
+                                <tr>
+                                    <td colspan="5" class="p-4 text-center text-slate-400">No hay inscritos guardados aún.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: REPORTE -->
+            <div id="view-reporte" class="space-y-4 hidden">
+                <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-gray-100">
+                    <button onclick="goHome()" class="flex items-center space-x-1 text-cncm-blue font-bold text-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Menú Principal</span>
+                    </button>
+                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Reportes y Metas</span>
+                </div>
+
+                <!-- REPORTE SEMANAL -->
+                <div class="bg-gradient-to-br from-cncm-blue to-blue-950 text-white rounded-3xl p-4 shadow-lg space-y-3.5 border-t-4 border-cncm-red">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-extrabold text-sm">Reporte Semanal</h2>
+                            <p class="text-[10px] text-blue-200">Reinicio automático Domingos 12:00 AM</p>
+                        </div>
+                        <div class="text-right bg-blue-900/90 border border-blue-800 px-2.5 py-1 rounded-xl">
+                            <span class="text-[9px] text-blue-300 block uppercase font-bold tracking-wider">No. de Semana</span>
+                            <span id="display-numero-semana" class="text-sm font-extrabold text-white">40</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5 items-center">
+                        <div class="bg-blue-900/80 border border-blue-800 rounded-2xl p-2.5 text-center">
+                            <span class="text-[10px] text-blue-300 font-bold block mb-1">Meta Semanal</span>
+                            <input type="number" id="input-meta-semanal" value="10" onchange="updateMetaSemanal(this.value)" class="w-16 bg-blue-950 text-center text-lg font-extrabold text-white rounded-xl border border-blue-700 py-0.5 focus:outline-none">
+                        </div>
+                        <div class="bg-blue-900/80 border border-blue-800 rounded-2xl p-2.5 text-center">
+                            <span class="text-[10px] text-blue-300 font-bold block mb-1">Logrados</span>
+                            <span id="logrados-valor" class="text-xl font-extrabold text-emerald-400">0</span>
+                        </div>
+                    </div>
+
+                    <div id="meta-status-banner" class="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span id="meta-status-text" class="text-[11px] font-bold text-amber-300">Meta Semanal en Proceso</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTE MENSUAL -->
+                <div class="bg-gradient-to-br from-slate-900 to-cncm-blue text-white rounded-3xl p-4 shadow-lg space-y-3.5 border-t-4 border-cncm-blue">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-extrabold text-sm">Reporte Mensual</h2>
+                            <p id="current-month-label" class="text-[11px] text-blue-200">Nombre del mes: Septiembre 2026</p>
+                        </div>
+                        <span class="px-2.5 py-1 bg-cncm-red text-white rounded-full text-[10px] font-extrabold uppercase">Mensual</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5 items-center">
+                        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-2.5 text-center">
+                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Meta Mensual</span>
+                            <input type="number" id="input-meta-mensual" value="33" onchange="updateMetaMensual(this.value)" class="w-16 bg-slate-900 text-center text-lg font-extrabold text-white rounded-xl border border-slate-600 py-0.5 focus:outline-none">
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-2.5 text-center">
+                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Logrados (Mes)</span>
+                            <span id="mensual-logrados-valor" class="text-xl font-extrabold text-emerald-400">23</span>
+                        </div>
+                    </div>
+
+                    <div id="mensual-status-banner" class="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span id="mensual-status-text" class="text-[11px] font-bold text-emerald-300">Meta en proceso</span>
+                            <span id="mensual-porcentaje" class="text-[11px] font-extrabold text-emerald-400">70%</span>
+                        </div>
+                        <p id="mensual-detalle-faltante" class="text-[10px] text-blue-100 font-medium"></p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div>Gerente: <strong id="mensual-gerente-count" class="text-white block text-xs">17</strong></div>
+                        <div>Asesor: <strong id="mensual-asesor-count" class="text-white block text-xs">6</strong></div>
+                        <div>Otros: <strong id="mensual-otros-count" class="text-white block text-xs">0</strong></div>
+                    </div>
+
+                    <!-- Desglose de Registros (Mes) en Barras de Progreso (Sin porcentajes) -->
+                    <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 space-y-2.5">
+                        <span class="text-[11px] font-extrabold text-blue-200 block text-center uppercase tracking-wider">Desglose de Registros (Mes)</span>
+                        <div id="mensual-courses-breakdown" class="space-y-2 text-[11px]">
+                            <!-- Dynamically populated progress bars -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="printPDFReport()" class="w-full py-3.5 bg-cncm-red text-white rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md active:scale-95 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span>Generar Reporte Mensual</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="no-print absolute bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-around items-center px-2 pb-2 z-30">
+            <button onclick="goHome()" id="nav-btn-home" class="flex flex-col items-center text-cncm-blue space-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="text-[9px] font-extrabold">Menú</span>
+            </button>
+            <button onclick="switchView('pendientes')" id="nav-btn-pendientes" class="flex flex-col items-center text-slate-400 space-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-[9px] font-semibold">Pendientes</span>
+            </button>
+            <button onclick="switchView('registros')" id="nav-btn-registros" class="flex flex-col items-center text-slate-400 space-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                <span class="text-[9px] font-semibold">Registros</span>
+            </button>
+            <button onclick="switchView('reporte')" id="nav-btn-reporte" class="flex flex-col items-center text-slate-400 space-y-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span class="text-[9px] font-semibold">Reportes</span>
+            </button>
+        </nav>
+
+        <!-- Historial Modal -->
+        <div id="historialModal" class="hidden absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-3">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-4 space-y-3 shadow-2xl max-h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-extrabold text-slate-800 text-sm">Ver Historial</h3>
+                    <button onclick="closeHistorialModal()" class="text-slate-400 p-1 hover:text-slate-800 font-bold text-base">&times;</button>
+                </div>
+
+                <!-- Filters Bar -->
+                <div class="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-2xl border text-[11px]">
+                    <div>
+                        <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Semana</label>
+                        <select id="filter-semana" onchange="filterHistorial()" class="w-full bg-white border rounded-lg p-1 text-[11px] font-bold">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Mes</label>
+                        <select id="filter-mes" onchange="filterHistorial()" class="w-full bg-white border rounded-lg p-1 text-[11px] font-bold">
+                            <option value="">Todos</option>
+                            <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+                            <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+                            <option value="6">Julio</option><option value="7">Agosto</option><option value="8" selected>Septiembre</option>
+                            <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Año</label>
+                        <select id="filter-anio" onchange="filterHistorial()" class="w-full bg-white border rounded-lg p-1 text-[11px] font-bold">
+                            <option value="">Todos</option>
+                            <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto space-y-2">
+                    <div id="historial-registros-list" class="space-y-1.5 text-xs">
+                        <p class="text-slate-400 text-center py-4">No hay historial registrado.</p>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t flex justify-between items-center">
+                    <div class="flex space-x-1.5">
+                        <button onclick="exportHistorial('excel')" class="py-1.5 px-3 bg-emerald-600 text-white rounded-xl text-[11px] font-bold flex items-center space-x-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>Excel</span>
+                        </button>
+                        <button onclick="exportHistorial('pdf')" class="py-1.5 px-3 bg-cncm-red text-white rounded-xl text-[11px] font-bold flex items-center space-x-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>PDF</span>
+                        </button>
+                    </div>
+                    <button onclick="closeHistorialModal()" class="py-1.5 px-4 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRINTABLE PDF HORIZONTAL DASHBOARD (CNCM BRANDED) -->
+        <div id="printable-pdf-dashboard" class="hidden print-only bg-white text-slate-950 p-6 space-y-5 font-sans border-t-8 border-[#0B3B60] w-[950px] mx-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center border-b-2 border-[#0B3B60] pb-4">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-[#0B3B60] font-black text-sm shadow-md overflow-hidden p-1.5 border border-blue-100">
+                        <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://www.cncm.edu.mx/images/logo.png'; this.onerror=function(){this.parentElement.innerHTML='<b>CNCM</b>';};">
+                    </div>
+                    <div>
+                        <h1 class="text-base font-black text-[#0B3B60] uppercase tracking-wide">Grupo Educativo CNCM</h1>
+                        <p class="text-xs text-[#D32F2F] font-extrabold tracking-wider">DASHBOARD INSTITUCIONAL DE RESULTADOS MENSUALES</p>
+                    </div>
+                </div>
+                <div class="text-right text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border">
+                    <p id="pdf-print-date">Fecha: 9/28/2026</p>
+                    <p id="pdf-print-month" class="font-bold text-[#0B3B60]">Mes: Septiembre 2026</p>
+                </div>
+            </div>
+
+            <!-- KPI Cards Row -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-blue-50 border-l-4 border-[#0B3B60] p-4 rounded-xl text-center shadow-sm">
+                    <span class="text-xs text-[#0B3B60] font-extrabold uppercase block">META DEL MES</span>
+                    <span id="pdf-meta-mes" class="text-3xl font-black text-[#0B3B60]">33</span>
+                    <span class="text-[10px] text-slate-600 font-bold">REGISTROS</span>
+                </div>
+                <div class="bg-red-50 border-l-4 border-[#D32F2F] p-4 rounded-xl text-center shadow-sm">
+                    <span class="text-xs text-[#D32F2F] font-extrabold uppercase block">LOGRADOS DEL MES</span>
+                    <span id="pdf-logrados-mes" class="text-3xl font-black text-[#D32F2F]">23</span>
+                    <span class="text-[10px] text-slate-600 font-bold">REGISTROS</span>
+                </div>
+                <div class="bg-slate-100 border-l-4 border-slate-700 p-4 rounded-xl text-center shadow-sm">
+                    <span class="text-xs text-slate-700 font-extrabold uppercase block">% CUMPLIMIENTO</span>
+                    <span id="pdf-porcentaje-mes" class="text-3xl font-black text-slate-950">70%</span>
+                    <span class="text-[10px] text-slate-600 font-bold">DE LA META</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar Section -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+                <div class="flex justify-between text-xs font-bold text-[#0B3B60]">
+                    <span>PROGRESO DE META MENSUAL</span>
+                    <span id="pdf-chart-percent">70%</span>
+                </div>
+                <div class="w-full bg-slate-200 h-5 rounded-full overflow-hidden flex">
+                    <div id="pdf-chart-bar" class="bg-[#0B3B60] h-full transition-all duration-500" style="width: 70%"></div>
+                </div>
+                <div class="text-xs text-slate-700 font-semibold text-right" id="pdf-status-banner">Meta en proceso</div>
+            </div>
+
+            <!-- Desglose de Registros (Mes) en PDF -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+                <h3 class="text-xs font-extrabold text-[#0B3B60] uppercase tracking-wider">Desglose de Registros (Mes)</h3>
+                <div id="pdf-courses-breakdown" class="space-y-1.5 text-xs">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-3 text-center text-xs text-slate-600 border-t flex justify-between items-center">
+                <span>Grupo Educativo CNCM</span>
+                <span class="text-[#D32F2F] font-bold">Reporte Gerencial Oficial</span>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
+            <span id="toast-msg">Acción completada</span>
+        </div>
+
+    </div>
+
+    <script>
+        // Historial completo hasta semana 39 e inscripciones previas
+        let pendientes = JSON.parse(localStorage.getItem('cncm_pendientes')) || [
+            { id: "PEN-1", nombre: "Maria alfaro", telefono: "4641089825", curso: "Curso kids (inglés y computación)", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
+            { id: "PEN-2", nombre: "Julian Vidal Garcia", telefono: "4774013824", curso: "Curso kids (inglés y computación)", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
+            { id: "PEN-3", nombre: "Selene hija", telefono: "4641168469", curso: "Curso kids (inglés y computación)", tipoAtencion: "ABORDAR", rol: "GERENTE", semana: 39 },
+            { id: "PEN-4", nombre: "Jesus Trinidad Morales Acosta", telefono: "4642133988", curso: "Especialidad en inglés", tipoAtencion: "ABORDAR", rol: "GERENTE", semana: 39 },
+            { id: "PEN-5", nombre: "A", telefono: "4646466250", curso: "Curso personalizado: Ingles", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
+            { id: "PEN-6", nombre: "Maria Alely Mireles robles", telefono: "4776702836", curso: "Curso personalizado: Excel básico", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
+            { id: "PEN-7", nombre: "Paula", telefono: "4646528151", curso: "Especialidad en inglés", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
+            { id: "PEN-8", nombre: "Ana", telefono: "4641296612", curso: "Especialidad en inglés", tipoAtencion: "ABORDAR", rol: "GERENTE", semana: 39 }
+        ];
+
+        let historialGlobal = JSON.parse(localStorage.getItem('cncm_historial_global')) || [
+            { id: "10352", control: "10352", tipoRegistro: "Reinscrito", nombre: "ALLISON JANETTE VAZQUEZ SANCHEZ", curso: "Especialidad en inglés", rol: "RECEP", fecha: "2026-09-25T10:00:00.000Z", semana: 39 },
+            { id: "12676", control: "12676", tipoRegistro: "Módulo", nombre: "Jesus Trinidad Morales Acosta", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-25T10:00:00.000Z", semana: 39 },
+            { id: "12675", control: "12675", tipoRegistro: "Módulo", nombre: "Maria Valentina Cuevas Martinez", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-24T12:00:00.000Z", semana: 39 },
+            { id: "12673", control: "12673", tipoRegistro: "Módulo", nombre: "JOSE MARIA VILLICAÑA RODRIGUEZ", curso: "Prepa Abierta", rol: "GERENTE", fecha: "2026-09-24T11:00:00.000Z", semana: 39 },
+            { id: "12674", control: "12674", tipoRegistro: "Módulo", nombre: "Maria Arely Mireles Robles", curso: "Curso personalizado: Excel básico", rol: "GERENTE", fecha: "2026-09-24T10:30:00.000Z", semana: 39 },
+            { id: "12672", control: "12672", tipoRegistro: "Módulo", nombre: "Jesus Isaac Mendez Garcia", curso: "Prepa Abierta", rol: "GERENTE", fecha: "2026-09-24T10:15:00.000Z", semana: 39 },
+            { id: "12671", control: "12671", tipoRegistro: "Módulo", nombre: "Judith Pamela Muñoz Lopez", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-24T10:00:00.000Z", semana: 39 },
+            { id: "12670", control: "12670", tipoRegistro: "Módulo", nombre: "Viri Diana Negrete Collazo", curso: "Especialidad en computación", rol: "EMMANUEL ZOTICO", fecha: "2026-09-23T11:30:00.000Z", semana: 38 },
+            { id: "12669", control: "12669", tipoRegistro: "Módulo", nombre: "Ruben Alejandro Aguilar Alfaro", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-22T09:15:00.000Z", semana: 38 },
+            { id: "12668", control: "12668", tipoRegistro: "Módulo", nombre: "Dylan González Montenegro", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-21T14:20:00.000Z", semana: 38 },
+            { id: "12667", control: "12667", tipoRegistro: "Módulo", nombre: "María Soledad Celaya Celedon", curso: "Especialidad en computación", rol: "GERENTE", fecha: "2026-09-20T16:00:00.000Z", semana: 38 },
+            { id: "12666", control: "12666", tipoRegistro: "Módulo", nombre: "Esther Jacqueline Ruiz Galdeano", curso: "Especialidad en computación", rol: "WENDY MARISSA", fecha: "2026-09-19T10:00:00.000Z", semana: 38 },
+            { id: "12665", control: "12665", tipoRegistro: "Módulo", nombre: "Areli Guadalupe Ramirez Gonzalez", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-15T12:00:00.000Z", semana: 37 },
+            { id: "11694", control: "11694", tipoRegistro: "Reinscrito", nombre: "Yamil Uriel Perez Morales", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-14T15:10:00.000Z", semana: 37 },
+            { id: "12664", control: "12664", tipoRegistro: "Módulo", nombre: "José Carlos Loredo Muñoz", curso: "Especialidad en inglés", rol: "EMMANUEL ZOTICO", fecha: "2026-09-13T10:00:00.000Z", semana: 37 },
+            { id: "12663", control: "12663", tipoRegistro: "Módulo", nombre: "Maximiliano Loredo Muñoz", curso: "Especialidad en inglés", rol: "EMMANUEL ZOTICO", fecha: "2026-09-12T11:30:00.000Z", semana: 37 },
+            { id: "12662", control: "12662", tipoRegistro: "Módulo", nombre: "Jimena Arredondo Contreras", curso: "Prepa Abierta", rol: "CRM RICARDO", fecha: "2026-09-10T09:15:00.000Z", semana: 36 },
+            { id: "12661", control: "12661", tipoRegistro: "Módulo", nombre: "José Silva Muñoz", curso: "Especialidad en computación", rol: "GERENTE", fecha: "2026-09-09T14:20:00.000Z", semana: 36 },
+            { id: "12660", control: "12660", tipoRegistro: "Módulo", nombre: "Mia Aylin Sierra Capetillo", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-08T16:00:00.000Z", semana: 36 },
+            { id: "12659", control: "12659", tipoRegistro: "Módulo", nombre: "Ariana Yaretzi Sierra Capetillo", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-07T10:00:00.000Z", semana: 36 },
+            { id: "12658", control: "12658", tipoRegistro: "Módulo", nombre: "Nora Lemus Alcaraz", curso: "Especialidad en computación", rol: "GERENTE", fecha: "2026-09-06T12:00:00.000Z", semana: 36 },
+            { id: "12657", control: "12657", tipoRegistro: "Módulo", nombre: "Melissa Aguilera Lomas", curso: "Especialidad en inglés", rol: "GERENTE", fecha: "2026-09-05T15:10:00.000Z", semana: 36 },
+            { id: "12656", control: "12656", tipoRegistro: "Módulo", nombre: "Abigail Cardoso Cruz", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-04T10:00:00.000Z", semana: 36 },
+            { id: "12655", control: "12655", tipoRegistro: "Módulo", nombre: "Andrea Fidel Teofilo", curso: "Especialidad en inglés", rol: "EMMANUEL ZOTICO", fecha: "2026-09-03T11:30:00.000Z", semana: 36 },
+            { id: "12654", control: "12654", tipoRegistro: "Módulo", nombre: "Alicia Muñoz Olivares", curso: "Especialidad en computación", rol: "EMMANUEL ZOTICO", fecha: "2026-09-02T09:15:00.000Z", semana: 36 },
+            { id: "12252", control: "12252", tipoRegistro: "Módulo", nombre: "Danna Amayrani Aboytes Garcia", curso: "Prepa escolarizada", rol: "GERENTE", fecha: "2026-09-01T14:20:00.000Z", semana: 36 },
+            { id: "12653", control: "12653", tipoRegistro: "Módulo", nombre: "David Antonio Rodriguez Sanchez", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-01T16:00:00.000Z", semana: 36 },
+            { id: "12652", control: "12652", tipoRegistro: "Módulo", nombre: "Juan Pablo Rodriguez Sanchez", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-01T10:00:00.000Z", semana: 36 },
+            { id: "12651", control: "12651", tipoRegistro: "Módulo", nombre: "Cynthia Ramirez Delgado", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-01T09:00:00.000Z", semana: 36 }
+        ];
+
+        // Automatic Sunday Week Calculation & Reset Logic (Locked / Non-editable)
+        function getCurrentAutomaticWeek() {
+            const now = new Date();
+            const refDate = new Date(2026, 8, 28); // Sept 28, 2026 is week 40
+            const refWeek = 40;
+            const diffTime = now.getTime() - refDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffWeeks = Math.floor(diffDays / 7);
+            return refWeek + diffWeeks;
         }
-    }
 
-    function resetReporteVisual() {
-        if(confirm('¿Deseas iniciar la vista limpia para la nueva semana? (Tus registros anteriores se conservan seguros en el Historial).')) {
-            registros = registros.filter(r => r.semana != currentWeek);
-            saveData();
-            alert('¡Vista de reporte reiniciada con éxito!');
-        }
-    }
+        let numeroSemana = getCurrentAutomaticWeek();
+        let metaSemanal = parseInt(localStorage.getItem('cncm_meta_semanal')) || 10;
+        let metaMensual = parseInt(localStorage.getItem('cncm_meta_mensual')) || 33;
 
-    function openHistorialModal() {
-        document.getElementById('historialModal').classList.remove('hidden');
-        renderHistorialTable();
-    }
-    function closeHistorialModal() { document.getElementById('historialModal').classList.add('hidden'); }
+        window.onload = function() {
+            document.getElementById('display-numero-semana').innerText = numeroSemana;
+            document.getElementById('display-table-week').innerText = numeroSemana;
+            document.getElementById('input-meta-semanal').value = metaSemanal;
+            document.getElementById('input-meta-mensual').value = metaMensual;
 
-    function renderHistorialTable() {
-        const filtro = document.getElementById('filtroSemana').value;
-        const tbody = document.getElementById('historialTableBody');
-        tbody.innerHTML = '';
-        const filtrados = filtro ? registros.filter(r => r.semana == filtro) : registros;
+            updateMenuCounts();
+            updatePendientesList();
+            updateRegistrosTable();
+            updateReport();
+            populateSemanaFilterOptions();
+        };
 
-        if(filtrados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-slate-400">No hay registros para este filtro.</td></tr>';
-            return;
+        function updateMetaSemanal(val) {
+            metaSemanal = parseInt(val) || 10;
+            localStorage.setItem('cncm_meta_semanal', metaSemanal);
+            updateReport();
         }
 
-        filtrados.forEach(r => {
-            tbody.innerHTML += `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="p-1.5 font-bold">Sem ${r.semana}</td>
-                    <td class="p-1.5">${r.control}</td>
-                    <td class="p-1.5">${r.nombre}</td>
-                    <td class="p-1.5">${r.seccion}</td>
-                    <td class="p-1.5">${r.curso}</td>
+        function updateMetaMensual(val) {
+            metaMensual = parseInt(val) || 33;
+            localStorage.setItem('cncm_meta_mensual', metaMensual);
+            updateReport();
+        }
+
+        function handleCursoChange(selectElem, containerId) {
+            const container = document.getElementById(containerId);
+            const customInput = container.querySelector('input');
+            if (selectElem.value === 'Curso personalizado') {
+                container.classList.remove('hidden');
+                customInput.setAttribute('required', 'true');
+            } else {
+                container.classList.add('hidden');
+                customInput.removeAttribute('required');
+                customInput.value = '';
+            }
+        }
+
+        function handleRolChange(selectElem) {
+            const container = document.getElementById('custom-rol-container');
+            const customInput = container.querySelector('input');
+            if (selectElem.value === 'OTRO') {
+                container.classList.remove('hidden');
+                customInput.setAttribute('required', 'true');
+            } else {
+                container.classList.add('hidden');
+                customInput.removeAttribute('required');
+                customInput.value = '';
+            }
+        }
+
+        function switchView(viewName) {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-pendientes').classList.add('hidden');
+            document.getElementById('view-registros').classList.add('hidden');
+            document.getElementById('view-reporte').classList.add('hidden');
+            document.getElementById('home-icon-btn').classList.remove('hidden');
+
+            const navHome = document.getElementById('nav-btn-home');
+            const navPend = document.getElementById('nav-btn-pendientes');
+            const navRegs = document.getElementById('nav-btn-registros');
+            const navRep  = document.getElementById('nav-btn-reporte');
+
+            navHome.className = "flex flex-col items-center text-slate-400 space-y-0.5";
+            navPend.className = "flex flex-col items-center text-slate-400 space-y-0.5";
+            navRegs.className = "flex flex-col items-center text-slate-400 space-y-0.5";
+            navRep.className  = "flex flex-col items-center text-slate-400 space-y-0.5";
+
+            if(viewName === 'pendientes') {
+                document.getElementById('view-pendientes').classList.remove('hidden');
+                navPend.className = "flex flex-col items-center text-cncm-blue space-y-0.5";
+                document.getElementById('app-subtitle').innerText = "Módulo Pendientes y Seguimiento";
+            } else if(viewName === 'registros') {
+                document.getElementById('view-registros').classList.remove('hidden');
+                navRegs.className = "flex flex-col items-center text-cncm-blue space-y-0.5";
+                document.getElementById('app-subtitle').innerText = "Inscripciones Diarias";
+                updateRegistrosTable();
+            } else if(viewName === 'reporte') {
+                document.getElementById('view-reporte').classList.remove('hidden');
+                navRep.className = "flex flex-col items-center text-cncm-red space-y-0.5";
+                document.getElementById('app-subtitle').innerText = "Reportes y Metas Semanales";
+                updateReport();
+            }
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function goHome() {
+            document.getElementById('view-menu').classList.remove('hidden');
+            document.getElementById('view-pendientes').classList.add('hidden');
+            document.getElementById('view-registros').classList.add('hidden');
+            document.getElementById('view-reporte').classList.add('hidden');
+            document.getElementById('home-icon-btn').classList.add('hidden');
+            document.getElementById('app-subtitle').innerText = "Sistema de Control y Reportes";
+
+            const navHome = document.getElementById('nav-btn-home');
+            const navPend = document.getElementById('nav-btn-pendientes');
+            const navRegs = document.getElementById('nav-btn-registros');
+            const navRep  = document.getElementById('nav-btn-reporte');
+
+            navHome.className = "flex flex-col items-center text-cncm-blue space-y-0.5";
+            navPend.className = "flex flex-col items-center text-slate-400 space-y-0.5";
+            navRegs.className = "flex flex-col items-center text-slate-400 space-y-0.5";
+            navRep.className  = "flex flex-col items-center text-slate-400 space-y-0.5";
+
+            updateMenuCounts();
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function updateMenuCounts() {
+            let regsSemana = historialGlobal.filter(h => String(h.semana) === String(numeroSemana));
+            document.getElementById('menu-pendientes-count').innerText = `${pendientes.length} prospectos`;
+            document.getElementById('menu-registros-count').innerText = `${regsSemana.length} inscritos diarios`;
+        }
+
+        function handlePendienteSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            let cursoSeleccionado = formData.get('curso');
+            if (cursoSeleccionado === 'Curso personalizado') {
+                const customVal = formData.get('cursoPersonalizado');
+                if (customVal && customVal.trim() !== '') {
+                    cursoSeleccionado = `Curso personalizado: ${customVal.trim()}`;
+                }
+            }
+
+            const newItem = {
+                id: 'PEN-' + Date.now().toString().slice(-6),
+                nombre: formData.get('nombre'),
+                telefono: formData.get('telefono'),
+                curso: cursoSeleccionado,
+                tipoAtencion: formData.get('tipoAtencion'),
+                rol: formData.get('rol'),
+                fecha: new Date().toISOString(),
+                semana: numeroSemana
+            };
+
+            pendientes.unshift(newItem);
+            localStorage.setItem('cncm_pendientes', JSON.stringify(pendientes));
+            form.reset();
+            document.getElementById('custom-curso-container').classList.add('hidden');
+            updateMenuCounts();
+            updatePendientesList();
+            showToast('Prospecto guardado en pendientes.');
+        }
+
+        function updatePendientesList() {
+            const container = document.getElementById('pendientes-list-container');
+            document.getElementById('badge-pendientes-total').innerText = `${pendientes.length} en total`;
+
+            if(pendientes.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No hay prospectos pendientes.</p>`;
+                return;
+            }
+
+            container.innerHTML = pendientes.map(p => {
+                const isInforme = p.tipoAtencion === 'INFORME';
+                const badgeClass = isInforme ? 'bg-blue-50 text-cncm-blue' : 'bg-orange-50 text-orange-600';
+                return `
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 flex justify-between items-center text-xs">
+                        <div class="space-y-0.5">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-slate-800 text-xs">${p.nombre}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${badgeClass}">${p.tipoAtencion}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500">Tel: ${p.telefono} • <span class="font-medium text-slate-700">${p.curso}</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold">Atendido por: ${p.rol}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportPendientesPDF() {
+            if (pendientes.length === 0) {
+                showToast('No hay prospectos pendientes para exportar.');
+                return;
+            }
+            const printWindow = window.open('', '_blank', 'width=950,height=700');
+            if (printWindow) {
+                let rowsHtml = pendientes.map(p => `
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${p.nombre}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${p.telefono}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${p.curso}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${p.tipoAtencion}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${p.rol}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${p.semana || '-'}</td>
+                    </tr>
+                `).join('');
+
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Grupo Educativo CNCM</title>
+                        <style>
+                            body { font-family: sans-serif; padding: 20px; color: #111; }
+                            h2 { color: #0B3B60; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+                            th { background-color: #0B3B60; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Grupo Educativo CNCM - Reporte de Pendientes</h2>
+                        <p>Fecha de emisión: ${new Date().toLocaleDateString()}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Prospecto</th>
+                                    <th>Teléfono</th>
+                                    <th>Curso</th>
+                                    <th>Atención</th>
+                                    <th>Responsable</th>
+                                    <th>Semana</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                        <script>
+                            setTimeout(() => { window.print(); }, 500);
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            }
+        }
+
+        function handleRegistroSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            let cursoSeleccionado = formData.get('curso');
+            if (cursoSeleccionado === 'Curso personalizado') {
+                const customVal = formData.get('cursoPersonalizado');
+                if (customVal && customVal.trim() !== '') {
+                    cursoSeleccionado = `Curso personalizado: ${customVal.trim()}`;
+                }
+            }
+
+            let rolValue = formData.get('rol');
+            if (rolValue === 'OTRO') {
+                const customRol = formData.get('rolPersonalizado');
+                if (customRol && customRol.trim() !== '') {
+                    rolValue = customRol.trim().toUpperCase();
+                } else {
+                    rolValue = 'OTRO';
+                }
+            }
+
+            const newReg = {
+                id: formData.get('control'),
+                control: formData.get('control'),
+                tipoRegistro: formData.get('tipoRegistro'),
+                nombre: formData.get('nombre'),
+                curso: cursoSeleccionado,
+                rol: rolValue,
+                fecha: new Date().toISOString(),
+                semana: numeroSemana
+            };
+
+            historialGlobal = historialGlobal.filter(h => h.id !== newReg.id);
+            historialGlobal.unshift(newReg);
+            localStorage.setItem('cncm_historial_global', JSON.stringify(historialGlobal));
+
+            form.reset();
+            document.getElementById('custom-curso-registro-container').classList.add('hidden');
+            document.getElementById('custom-rol-container').classList.add('hidden');
+            updateMenuCounts();
+            updateRegistrosTable();
+            updateReport();
+            populateSemanaFilterOptions();
+            showToast('Inscripción guardada exitosamente.');
+        }
+
+        function updateRegistrosTable() {
+            const tbody = document.getElementById('sheets-table-body');
+            let registrosSemana = historialGlobal.filter(h => String(h.semana) === String(numeroSemana));
+
+            document.getElementById('badge-total-registros').innerText = `${registrosSemana.length} inscritos`;
+            document.getElementById('display-table-week').innerText = numeroSemana;
+
+            if(registrosSemana.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay inscritos guardados para la semana ${numeroSemana}.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = registrosSemana.map(r => `
+                <tr class="hover:bg-slate-50 border-b border-gray-100 text-[11px]">
+                    <td class="p-2 font-bold text-cncm-blue">${r.control}</td>
+                    <td class="p-2"><span class="px-1.5 py-0.5 bg-blue-50 text-cncm-blue rounded font-bold">${r.tipoRegistro || 'Módulo'}</span></td>
+                    <td class="p-2 font-bold text-slate-800">${r.nombre}</td>
+                    <td class="p-2">${r.curso}</td>
+                    <td class="p-2 font-bold text-slate-700">${r.rol}</td>
                 </tr>
-            `;
-        });
-    }
+            `).join('');
+        }
 
-    function exportHistorialExcel() {
-        const filtro = document.getElementById('filtroSemana').value;
-        const dataToExport = filtro ? registros.filter(r => r.semana == filtro) : registros;
-        const ws = XLSX.utils.json_to_sheet(dataToExport);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Historial");
-        XLSX.writeFile(wb, "Historial_CNCM.xlsx");
-    }
+        function updateReport() {
+            document.getElementById('display-numero-semana').innerText = numeroSemana;
 
-    function exportHistorialPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(14);
-        doc.setTextColor(11, 59, 96);
-        doc.text("Grupo Educativo CNCM", 14, 15);
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text("Historial de Registros", 14, 22);
+            const currentMonthIndex = 8; // September
+            const currentYear = 2026;
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('current-month-label').innerText = `Nombre del mes: ${monthNames[currentMonthIndex]} ${currentYear}`;
 
-        const filtro = document.getElementById('filtroSemana').value;
-        const filtrados = filtro ? registros.filter(r => r.semana == filtro) : registros;
+            // Weekly Metrics
+            const registrosSemana = historialGlobal.filter(h => String(h.semana) === String(numeroSemana));
+            const totalLogrados = registrosSemana.length;
+            document.getElementById('logrados-valor').innerText = totalLogrados;
 
-        const tableData = filtrados.map(r => [r.semana, r.control, r.nombre, r.seccion, r.curso, r.rolTipo]);
-        doc.autoTable({
-            startY: 28,
-            head: [['Sem', 'Control', 'Nombre', 'Tipo', 'Curso', 'Rol']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [11, 59, 96] }
-        });
-        doc.save("Historial_CNCM.pdf");
-    }
+            const bannerSemana = document.getElementById('meta-status-banner');
+            const statusTextSemana = document.getElementById('meta-status-text');
 
-    function exportMonthlyPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.setTextColor(11, 59, 96);
-        doc.text("Grupo Educativo CNCM", 14, 18);
-        doc.setFontSize(11);
-        doc.setTextColor(80);
-        doc.text(`Reporte Semana ${currentWeek} - Grupo Educativo CNCM`, 14, 25);
-        
-        const regsSemanaActual = registros.filter(r => r.semana == currentWeek);
-        doc.text(`Total de registros: ${regsSemanaActual.length}`, 14, 32);
+            if (totalLogrados >= metaSemanal) {
+                bannerSemana.className = "p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-between";
+                statusTextSemana.innerText = "¡Meta Semanal Cumplida! 🎉";
+            } else {
+                bannerSemana.className = "p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-between";
+                statusTextSemana.innerText = "Meta Semanal en Proceso";
+            }
 
-        const desglose = {};
-        regsSemanaActual.forEach(r => { desglose[r.seccion] = (desglose[r.seccion] || 0) + 1; });
-        let summaryData = Object.entries(desglose).map(([k, v]) => [k, `${v} registros`]);
+            // Monthly Metrics for September 2026
+            const registrosMes = historialGlobal.filter(r => {
+                const d = new Date(r.fecha);
+                return d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
+            });
 
-        doc.autoTable({
-            startY: 38,
-            head: [['Categoría / Tipo', 'Cantidad']],
-            body: summaryData,
-            theme: 'striped',
-            headStyles: { fillColor: [11, 59, 96] }
-        });
+            const mensualLogrados = registrosMes.length;
+            document.getElementById('mensual-logrados-valor').innerText = mensualLogrados;
+            
+            const countGerente = registrosMes.filter(r => r.rol.toUpperCase().includes('GERENTE')).length;
+            const countAsesor = registrosMes.filter(r => r.rol.toUpperCase().includes('ASESOR') || r.rol.toUpperCase().includes('EMMANUEL') || r.rol.toUpperCase().includes('WENDY') || r.rol.toUpperCase().includes('RICARDO')).length;
+            const countOtros = Math.max(0, mensualLogrados - countGerente - countAsesor);
 
-        const tableData = regsSemanaActual.map(r => [r.semana, r.control, r.nombre, r.seccion, r.curso]);
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 10,
-            head: [['Sem', 'Control', 'Nombre', 'Tipo', 'Curso']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [211, 47, 47] }
-        });
-        doc.save(`Reporte_Semana_${currentWeek}_CNCM.pdf`);
-    }
+            document.getElementById('mensual-gerente-count').innerText = countGerente;
+            document.getElementById('mensual-asesor-count').innerText = countAsesor;
+            document.getElementById('mensual-otros-count').innerText = countOtros;
 
-    function exportPendientesPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.setTextColor(11, 59, 96);
-        doc.text("Grupo Educativo CNCM", 14, 18);
-        doc.setFontSize(11);
-        doc.setTextColor(80);
-        doc.text("Listado de Prospectos Pendientes", 14, 25);
+            // Desglose de Registros (Mes) as Progress Bars (Sin porcentajes)
+            const coursesList = [
+                "Prepa Abierta",
+                "Prepa escolarizada",
+                "Especialidad en inglés",
+                "Especialidad en computación",
+                "Curso kids (inglés y computación)",
+                "Curso kids extensivo",
+                "Curso personalizado",
+                "Robótica"
+            ];
+            
+            const breakdownContainer = document.getElementById('mensual-courses-breakdown');
+            breakdownContainer.innerHTML = coursesList.map(courseName => {
+                const count = registrosMes.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
+                const maxCount = Math.max(...coursesList.map(c => registrosMes.filter(r => r.curso.toLowerCase().includes(c.toLowerCase())).length), 1);
+                const barWidth = Math.round((count / maxCount) * 100);
+                return `
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-slate-300">${courseName}</span>
+                            <span class="font-extrabold text-white">${count}</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden flex">
+                            <div class="bg-gradient-to-r from-cncm-blue to-blue-400 h-full rounded-full transition-all duration-300" style="width: ${barWidth}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
-        const tableData = pendientes.map(p => [p.nombre, p.tel, p.curso, p.notas]);
-        doc.autoTable({
-            startY: 32,
-            head: [['Nombre', 'Teléfono', 'Curso', 'Observaciones']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [11, 59, 96] }
-        });
-        doc.save("Pendientes_CNCM.pdf");
-    }
+            const porcentajeMes = Math.min(100, Math.round((mensualLogrados / metaMensual) * 100));
+            document.getElementById('mensual-porcentaje').innerText = `${porcentajeMes}%`;
 
-    updateReports();
-</script>
+            const mensualBanner = document.getElementById('mensual-status-banner');
+            const mensualStatusText = document.getElementById('mensual-status-text');
+            const mensualDetalle = document.getElementById('mensual-detalle-faltante');
+
+            if (mensualLogrados >= metaMensual) {
+                mensualBanner.className = "p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 space-y-1";
+                mensualStatusText.innerText = "Meta alcanzada 🎉";
+                const excedente = mensualLogrados - metaMensual;
+                if (excedente > 0) {
+                    mensualDetalle.innerText = `¡Superado por ${excedente} registro(s)! Meta alcanzada.`;
+                } else {
+                    mensualDetalle.innerText = `Se completaron exactamente los ${metaMensual} registros del mes. Meta alcanzada.`;
+                }
+            } else {
+                mensualBanner.className = "p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 space-y-1";
+                mensualStatusText.innerText = "Meta en proceso";
+                const restante = metaMensual - mensualLogrados;
+                mensualDetalle.innerText = `Faltan ${restante} registro(s) para completar la meta de ${metaMensual}. Porcentaje actual: ${porcentajeMes}%.`;
+            }
+
+            // Sync hidden printable PDF dashboard data & breakdown
+            document.getElementById('pdf-print-date').innerText = `Fecha: ${new Date().toLocaleDateString()}`;
+            document.getElementById('pdf-print-month').innerText = `Mes: ${monthNames[currentMonthIndex]} ${currentYear}`;
+            document.getElementById('pdf-meta-mes').innerText = metaMensual;
+            document.getElementById('pdf-logrados-mes').innerText = mensualLogrados;
+            document.getElementById('pdf-porcentaje-mes').innerText = `${porcentajeMes}%`;
+            document.getElementById('pdf-chart-percent').innerText = `${porcentajeMes}%`;
+            document.getElementById('pdf-chart-bar').style.width = `${porcentajeMes}%`;
+
+            const pdfBreakdownContainer = document.getElementById('pdf-courses-breakdown');
+            pdfBreakdownContainer.innerHTML = coursesList.map(courseName => {
+                const count = registrosMes.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
+                return `
+                    <div class="flex justify-between items-center py-1 border-b border-slate-100">
+                        <span class="text-slate-700">${courseName}</span>
+                        <span class="font-extrabold text-[#0B3B60]">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        function populateSemanaFilterOptions() {
+            const selectSemana = document.getElementById('filter-semana');
+            let semanas = [...new Set(historialGlobal.map(h => h.semana).filter(Boolean))];
+            semanas.sort((a,b) => b - a);
+            selectSemana.innerHTML = '<option value="">Todas</option>' + semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join('');
+        }
+
+        function openHistorialModal() {
+            populateSemanaFilterOptions();
+            filterHistorial();
+            document.getElementById('historialModal').classList.remove('hidden');
+        }
+
+        function closeHistorialModal() {
+            document.getElementById('historialModal').classList.add('hidden');
+        }
+
+        function getFilteredHistorialData() {
+            const semVal = document.getElementById('filter-semana').value;
+            const mesVal = document.getElementById('filter-mes').value;
+            const anioVal = document.getElementById('filter-anio').value;
+
+            return historialGlobal.filter(h => {
+                let d = new Date(h.fecha);
+                let matchSemana = semVal === "" || String(h.semana) === String(semVal);
+                let matchMes = mesVal === "" || String(d.getMonth()) === String(mesVal);
+                let matchAnio = anioVal === "" || String(d.getFullYear()) === String(anioVal);
+                return matchSemana && matchMes && matchAnio;
+            });
+        }
+
+        function filterHistorial() {
+            let filtered = getFilteredHistorialData();
+            const container = document.getElementById('historial-registros-list');
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-4">No hay registros con los filtros seleccionados.</p>`;
+            } else {
+                container.innerHTML = filtered.map(h => `
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-cncm-blue">${h.control || h.id}</span> • <span class="font-bold text-slate-800">${h.nombre}</span>
+                            <div class="text-[10px] text-slate-500">Curso: ${h.curso} | Resp: ${h.rol} | Sem: ${h.semana || '-'}</div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-cncm-blue rounded-full">${h.tipoRegistro || 'Módulo'}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function exportHistorial(type) {
+            let filtered = getFilteredHistorialData();
+            if (filtered.length === 0) {
+                showToast('No hay datos para exportar con los filtros actuales.');
+                return;
+            }
+
+            if (type === 'excel') {
+                let csvContent = "data:text/csv;charset=utf-8,Control,Tipo,Nombre,Curso,Responsable,Semana,Fecha\n";
+                filtered.forEach(r => {
+                    let row = [r.control || r.id, r.tipoRegistro || '', `"${r.nombre}"`, `"${r.curso}"`, `"${r.rol}"`, r.semana || '', r.fecha || ''];
+                    csvContent += row.join(",") + "\n";
+                });
+                let encodedUri = encodeURI(csvContent);
+                let link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Historial_CNCM_${Date.now()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('Historial exportado a Excel (CSV).');
+            } else if (type === 'pdf') {
+                const printWindow = window.open('', '_blank', 'width=950,height=700');
+                if (printWindow) {
+                    let rowsHtml = filtered.map(r => `
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${r.control || r.id}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${r.tipoRegistro || ''}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${r.nombre}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${r.curso}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${r.rol}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${r.semana || '-'}</td>
+                        </tr>
+                    `).join('');
+
+                    printWindow.document.write(`
+                        <html>
+                        <head>
+                            <title>Grupo Educativo CNCM</title>
+                            <style>
+                                body { font-family: sans-serif; padding: 20px; color: #111; }
+                                h2 { color: #0B3B60; }
+                                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+                                th { background-color: #0B3B60; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>Grupo Educativo CNCM</h2>
+                            <p>Fecha de emisión: ${new Date().toLocaleDateString()}</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Control</th>
+                                        <th>Tipo</th>
+                                        <th>Alumno</th>
+                                        <th>Curso</th>
+                                        <th>Responsable</th>
+                                        <th>Semana</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                            <script>
+                                setTimeout(() => { window.print(); }, 500);
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                }
+            }
+        }
+
+        function printPDFReport() {
+            updateReport();
+            const printableDiv = document.getElementById('printable-pdf-dashboard');
+            
+            const printWindow = window.open('', '_blank', 'width=950,height=700');
+            if (printWindow) {
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Grupo Educativo CNCM</title>
+                        <script src="https://cdn.tailwindcss.com"><\/script>
+                        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;850&display=swap" rel="stylesheet">
+                        <style>
+                            body { font-family: 'Inter', sans-serif; background: white; color: #111827; padding: 20px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div style="max-width: 900px; margin: 0 auto;">
+                            ${printableDiv.innerHTML}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                window.print();
+                            }, 500);
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            } else {
+                window.print();
+            }
+        }
+    </script>
 </body>
 </html>
