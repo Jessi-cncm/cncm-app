@@ -18,30 +18,30 @@
             }
         }
     </script>
-    <!-- SheetJS & jsPDF for Excel & PDF exports -->
+    <!-- SheetJS & jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .ios-container { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
     </style>
 </head>
-<body class="bg-slate-100 flex justify-center items-start min-h-screen">
+<body class="bg-slate-200 flex justify-center items-start min-h-screen">
 
 <div class="ios-container flex flex-col">
-    <!-- Encabezado Institucional -->
+    <!-- Header Institucional -->
     <header class="bg-cncmBlue text-white p-4 shadow-md sticky top-0 z-30">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center w-12 h-12">
-                    <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM Logo" class="max-h-10 max-w-10 object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230B3B60\'/><text x=\'50\' y=\'60\' font-size=\'40\' fill=\'white\' text-anchor=\'middle\' font-family=\'Arial\'>CNCM</text></svg>';">
+                <div class="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center w-11 h-11">
+                    <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="max-h-9 max-w-9 object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230B3B60\'/><text x=\'50\' y=\'60\' font-size=\'40\' fill=\'white\' text-anchor=\'middle\' font-family=\'Arial\'>CNCM</text></svg>';">
                 </div>
                 <div>
-                    <h1 class="font-bold text-base leading-tight">Grupo Educativo CNCM</h1>
-                    <p class="text-xs text-slate-200">Control de Inscripciones y Prospectos</p>
+                    <h1 class="font-bold text-sm leading-tight">Grupo Educativo CNCM</h1>
+                    <p class="text-[11px] text-slate-200">Control de Inscripciones</p>
                 </div>
             </div>
             <div class="bg-cncmRed text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
@@ -50,8 +50,8 @@
         </div>
     </header>
 
-    <!-- Navegación por pestañas -->
-    <nav class="bg-white border-b border-slate-200 flex justify-around p-1 shadow-sm sticky top-[72px] z-20">
+    <!-- Pestañas de Navegación -->
+    <nav class="bg-white border-b border-slate-200 flex justify-around p-1 shadow-sm sticky top-[68px] z-20">
         <button onclick="switchTab('pendientes')" id="tab-pendientes" class="flex-1 py-2 text-center text-xs font-semibold text-cncmBlue border-b-2 border-cncmBlue transition">
             <i class="fa-solid fa-clock-rotate-left mb-0.5 block text-sm"></i>Pendientes
         </button>
@@ -66,10 +66,10 @@
     <!-- Contenido Principal -->
     <main class="flex-1 p-4 overflow-y-auto pb-20">
 
-        <!-- SECCIÓN: PENDIENTES -->
+        <!-- PENDIENTES -->
         <section id="section-pendientes" class="space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Gestión de Prospectos</h2>
+                <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Gestión de Prospectos</h2>
                 <div class="flex space-x-2">
                     <button onclick="exportPendientesPDF()" class="bg-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg font-medium shadow hover:bg-slate-800 transition">
                         <i class="fa-solid fa-file-pdf mr-1"></i>PDF
@@ -82,12 +82,12 @@
             <div id="pendientesList" class="space-y-3"></div>
         </section>
 
-        <!-- SECCIÓN: REGISTROS -->
+        <!-- REGISTROS -->
         <section id="section-registros" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Nuevo Registro</h2>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Semana Actual: <strong id="formWeekDisplay">40</strong></span>
+                    <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Nuevo Registro</h2>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Semana: <strong id="formWeekDisplay">40</strong></span>
                 </div>
                 
                 <form id="registroForm" onsubmit="handleAddRegistro(event)" class="space-y-3">
@@ -102,33 +102,35 @@
 
                     <div id="otroRolContainer" class="hidden">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Especificar Otro Rol / Tipo</label>
-                        <input type="text" id="regOtroRol" placeholder="Ej. Promoción especial" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none">
+                        <input type="text" id="regOtroRol" placeholder="Ej. Promoción especial" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Control / ID</label>
-                            <input type="text" id="regControl" placeholder="Ej. 12672" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none" required>
+                            <input type="text" id="regControl" placeholder="Ej. 12677" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Rol / Tipo Asignado</label>
-                            <input type="text" id="regRolTipo" placeholder="Ej. GERENTE" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none" required>
+                            <input type="text" id="regRolTipo" placeholder="Ej. GERENTE" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Completo del Alumno</label>
-                        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none" required>
+                        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Curso</label>
-                        <select id="regCurso" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-cncmBlue focus:outline-none" required>
+                        <select id="regCurso" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50" required>
                             <option value="Especialidad de inglés">Especialidad de inglés</option>
                             <option value="Especialidad en computación">Especialidad en computación</option>
                             <option value="Curso kids (inglés y computación)">Curso kids (inglés y computación)</option>
                             <option value="Prepa Abierta">Prepa Abierta</option>
                             <option value="Prepa escolarizada">Prepa escolarizada</option>
+                            <option value="Curso personalizado: Excel básico">Curso personalizado: Excel básico</option>
+                            <option value="Curso personalizado: Ingles">Curso personalizado: Ingles</option>
                         </select>
                     </div>
 
@@ -139,17 +141,15 @@
             </div>
         </section>
 
-        <!-- SECCIÓN: REPORTES -->
+        <!-- REPORTES -->
         <section id="section-reportes" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Reportes y Estadísticas</h2>
-                <!-- Botón para iniciar limpia la vista de reporte semanal/mensual sin borrar historial -->
+                <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Reportes y Estadísticas</h2>
                 <button onclick="resetReporteVisual()" class="text-[11px] text-slate-500 hover:text-cncmRed underline">
                     <i class="fa-solid fa-rotate-right mr-1"></i>Limpiar Vista Reporte
                 </button>
             </div>
 
-            <!-- Tarjeta Resumen Mes / Semana Activa -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-bold text-slate-700 uppercase" id="currentReportTitle">Registros (Semana Actual)</h3>
@@ -165,7 +165,7 @@
 
             <!-- Botón Ver Historial -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <h3 class="text-xs font-bold text-slate-700 uppercase">Historial y Filtros Avanzados</h3>
+                <h3 class="text-xs font-bold text-slate-700 uppercase">Historial de Inscripciones</h3>
                 <p class="text-xs text-slate-500">Consulta todo el acumulado histórico y descarga respaldos oficiales.</p>
                 <button onclick="openHistorialModal()" class="w-full bg-cncmBlue text-white text-xs font-bold py-2.5 rounded-lg shadow hover:bg-sky-900 transition flex items-center justify-center">
                     <i class="fa-solid fa-list-check mr-2"></i> Ver Historial
@@ -175,31 +175,31 @@
 
     </main>
 
-    <!-- MODAL NUEVO PENDIENTE -->
+    <!-- MODAL PENDIENTE -->
     <div id="pendienteModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="font-bold text-xs text-slate-800 uppercase">Nuevo Prospecto Pendiente</h3>
-                <button onclick="closePendienteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-base"></i></button>
+                <button onclick="closePendienteModal()" class="text-slate-400"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             <form onsubmit="handleSavePendiente(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre del Prospecto</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
                     <input type="text" id="pendNombre" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono de Contacto</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
                     <input type="text" id="pendTel" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Curso de Interés</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Curso</label>
                     <input type="text" id="pendCurso" class="w-full text-xs p-2 rounded-lg border border-slate-300" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Observaciones / Notas</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Observaciones</label>
                     <textarea id="pendNotas" class="w-full text-xs p-2 rounded-lg border border-slate-300" rows="2"></textarea>
                 </div>
-                <button type="submit" class="w-full bg-cncmRed text-white text-xs font-bold py-2.5 rounded-lg shadow">Guardar Pendiente</button>
+                <button type="submit" class="w-full bg-cncmRed text-white text-xs font-bold py-2.5 rounded-lg shadow">Guardar</button>
             </form>
         </div>
     </div>
@@ -209,7 +209,7 @@
         <div class="bg-white w-full max-h-[90vh] rounded-t-2xl p-4 shadow-2xl flex flex-col space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="font-bold text-sm text-slate-800 uppercase">Historial de Registros</h3>
-                <button onclick="closeHistorialModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeHistorialModal()" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="flex space-x-2">
                 <select id="filtroSemana" onchange="renderHistorialTable()" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-slate-50">
@@ -217,8 +217,8 @@
                     <option value="36">Semana 36</option>
                     <option value="37">Semana 37</option>
                     <option value="38">Semana 38</option>
-                    <option value="39">Semana 39</option>
-                    <option value="40" selected>Semana 40</option>
+                    <option value="39" selected>Semana 39</option>
+                    <option value="40">Semana 40</option>
                 </select>
                 <button onclick="exportHistorialExcel()" class="bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-bold shadow"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
                 <button onclick="exportHistorialPDF()" class="bg-cncmRed text-white text-xs px-3 py-2 rounded-lg font-bold shadow"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
@@ -246,7 +246,6 @@
 </div>
 
 <script>
-    // Cálculo automático ISO de Semana (Cambia automáticamente cada domingo/lunes del año)
     function getISOWeek(date) {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
@@ -258,8 +257,14 @@
     document.getElementById('currentWeekNum').innerText = currentWeek;
     document.getElementById('formWeekDisplay').innerText = currentWeek;
 
-    // Base de datos de registros (Histórico completo guardado en memoria del navegador)
+    // Historial completo hasta semana 39 integrado
     let registros = JSON.parse(localStorage.getItem('cncm_registros')) || [
+        {seccion: "Reinscrito", control: "10352", nombre: "ALLISON JANETTE VAZQUEZ SANCHEZ", curso: "Especialidad de inglés", rolTipo: "RECEP", semana: 39},
+        {seccion: "Módulo", control: "12676", nombre: "Jesus Trinidad Morales Acosta", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
+        {seccion: "Módulo", control: "12675", nombre: "Maria Valentina Cuevas Martinez", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
+        {seccion: "Módulo", control: "12673", nombre: "JOSE MARIA VILLICAÑA RODRIGUEZ", curso: "Prepa Abierta", rolTipo: "GERENTE", semana: 39},
+        {seccion: "Módulo", control: "12674", nombre: "Maria Arely Mireles Robles", curso: "Curso personalizado: Excel básico", rolTipo: "GERENTE", semana: 39},
+        {seccion: "Módulo", control: "12672", nombre: "Jesus Isaac Mendez Garcia", curso: "Prepa Abierta", rolTipo: "GERENTE", semana: 39},
         {seccion: "Módulo", control: "12671", nombre: "Judith Pamela Muñoz Lopez", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 39},
         {seccion: "Módulo", control: "12670", nombre: "Viri Diana Negrete Collazo", curso: "Especialidad en computación", rolTipo: "EMMANUEL ZOTICO", semana: 38},
         {seccion: "Módulo", control: "12669", nombre: "Ruben Alejandro Aguilar Alfaro", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 38},
@@ -274,7 +279,7 @@
         {seccion: "Módulo", control: "12661", nombre: "José Silva Muñoz", curso: "Especialidad en computación", rolTipo: "GERENTE", semana: 36},
         {seccion: "Módulo", control: "12660", nombre: "Mia Aylin Sierra Capetillo", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
         {seccion: "Módulo", control: "12659", nombre: "Ariana Yaretzi Sierra Capetillo", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
-        {seccion: "Módulo", control: "12658", nombre: "Nora Lemus Alcaraz", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 36},
+        {seccion: "Módulo", control: "12658", nombre: "Nora Lemus Alcaraz", curso: "Especialidad en computación", rolTipo: "GERENTE", semana: 36},
         {seccion: "Módulo", control: "12657", nombre: "Melissa Aguilera Lomas", curso: "Especialidad de inglés", rolTipo: "GERENTE", semana: 36},
         {seccion: "Módulo", control: "12656", nombre: "Abigail Cardoso Cruz", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36},
         {seccion: "Módulo", control: "12655", nombre: "Andrea Fidel Teofilo", curso: "Especialidad de inglés", rolTipo: "EMMANUEL ZOTICO", semana: 36},
@@ -285,9 +290,16 @@
         {seccion: "Módulo", control: "12651", nombre: "Cynthia Ramirez Delgado", curso: "Curso kids (inglés y computación)", rolTipo: "GERENTE", semana: 36}
     ];
 
+    // Pendientes integrados de la semana 39
     let pendientes = JSON.parse(localStorage.getItem('cncm_pendientes')) || [
-        {id: 1, nombre: "Sofía Martínez", tel: "4641234567", curso: "Especialidad de inglés", notas: "Llamar el miércoles por informes"},
-        {id: 2, nombre: "Carlos Gómez", tel: "4649876543", curso: "Prepa Abierta", notas: "Pendiente de enviar comprobante"}
+        {id: 1, nombre: "Maria alfaro", tel: "4641089825", curso: "Curso kids (inglés y computación)", notas: "INFORME | GERENTE"},
+        {id: 2, nombre: "Julian Vidal Garcia", tel: "4774013824", curso: "Curso kids (inglés y computación)", notas: "INFORME | GERENTE"},
+        {id: 3, nombre: "Selene hija", tel: "4641168469", curso: "Curso kids (inglés y computación)", notas: "ABORDAR | GERENTE"},
+        {id: 4, nombre: "Jesus Trinidad Morales Acosta", tel: "4642133988", curso: "Especialidad en inglés", notas: "ABORDAR | GERENTE"},
+        {id: 5, nombre: "A", tel: "4646466250", curso: "Curso personalizado: Ingles", notas: "INFORME | GERENTE"},
+        {id: 6, nombre: "Maria Alely Mireles robles", tel: "4776702836", curso: "Curso personalizado: Excel básico", notas: "INFORME | GERENTE"},
+        {id: 7, nombre: "Paula", tel: "4646528151", curso: "Especialidad en inglés", notas: "INFORME | GERENTE"},
+        {id: 8, nombre: "Ana", tel: "4641296612", curso: "Especialidad en inglés", notas: "ABORDAR | GERENTE"}
     ];
 
     function saveData() {
@@ -382,9 +394,7 @@
         renderPendientes();
     }
 
-    // Reportes de la semana actual (Automático)
     function updateReports() {
-        // Filtra únicamente los registros que pertenecen a la semana en curso para la vista rápida de reporte
         const regsSemanaActual = registros.filter(r => r.semana == currentWeek);
         document.getElementById('currentReportTitle').innerText = `Registros (Semana ${currentWeek} - Actual)`;
         document.getElementById('mesTotalCount').innerText = `${regsSemanaActual.length} registros`;
@@ -410,10 +420,8 @@
         }
     }
 
-    // Permite ocultar visualmente la semana anterior sin borrar los datos del historial
     function resetReporteVisual() {
         if(confirm('¿Deseas iniciar la vista limpia para la nueva semana? (Tus registros anteriores se conservan seguros en el Historial).')) {
-            // Asigna temporalmente una semana futura o limpia los de la semana actual del arreglo visual
             registros = registros.filter(r => r.semana != currentWeek);
             saveData();
             alert('¡Vista de reporte reiniciada con éxito!');
