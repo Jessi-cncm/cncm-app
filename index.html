@@ -377,7 +377,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h2 class="font-extrabold text-sm">Reporte Semanal</h2>
-                            <p class="text-[10px] text-blue-200">Reinicio automático Domingos 12:00 AM</p>
+                            <p class="text-[10px] text-blue-200">Reinicio automático Sábados 11:59 PM</p>
                         </div>
                         <div class="text-right bg-blue-900/90 border border-blue-800 px-2.5 py-1 rounded-xl">
                             <span class="text-[9px] text-blue-300 block uppercase font-bold tracking-wider">No. de Semana</span>
@@ -406,47 +406,59 @@
                     </div>
                 </div>
 
-                <!-- REPORTE MENSUAL -->
+                <!-- REPORTE MENSUAL / CICLO -->
                 <div class="bg-gradient-to-br from-slate-900 to-cncm-blue text-white rounded-3xl p-4 shadow-lg space-y-3.5 border-t-4 border-cncm-blue">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="font-extrabold text-sm">Reporte Mensual</h2>
-                            <p id="current-month-label" class="text-[11px] text-blue-200">Nombre del mes: Septiembre 2026</p>
+                            <h2 class="font-extrabold text-sm">Reporte Mensual / Ciclo</h2>
+                            <p id="current-month-label" class="text-[11px] text-blue-200">Periodo personalizado activo</p>
                         </div>
-                        <span class="px-2.5 py-1 bg-cncm-red text-white rounded-full text-[10px] font-extrabold uppercase">Mensual</span>
+                        <span class="px-2.5 py-1 bg-cncm-red text-white rounded-full text-[10px] font-extrabold uppercase">Ciclo</span>
+                    </div>
+
+                    <!-- SELECTOR DE FECHAS PARA EL PERIODO MENSUAL -->
+                    <div class="bg-slate-800/90 p-2.5 rounded-2xl border border-slate-700 space-y-2 text-xs">
+                        <span class="font-bold text-blue-200 block">Rango del Ciclo de Meta Mensual:</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-300 mb-0.5">Inicio:</label>
+                                <input type="date" id="input-fecha-inicio" onchange="updateFechasCiclo()" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1 text-[11px] text-white font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-300 mb-0.5">Término:</label>
+                                <input type="date" id="input-fecha-termino" onchange="updateFechasCiclo()" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1 text-[11px] text-white font-bold">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 items-center">
                         <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-2.5 text-center">
-                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Meta Mensual</span>
+                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Meta del Ciclo</span>
                             <input type="number" id="input-meta-mensual" value="33" onchange="updateMetaMensual(this.value)" class="w-16 bg-slate-900 text-center text-lg font-extrabold text-white rounded-xl border border-slate-600 py-0.5 focus:outline-none">
                         </div>
                         <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-2.5 text-center">
-                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Logrados (Mes)</span>
-                            <span id="mensual-logrados-valor" class="text-xl font-extrabold text-emerald-400">23</span>
+                            <span class="text-[10px] text-slate-300 font-bold block mb-1">Logrados (Ciclo)</span>
+                            <span id="mensual-logrados-valor" class="text-xl font-extrabold text-emerald-400">0</span>
                         </div>
                     </div>
 
                     <div id="mensual-status-banner" class="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 space-y-1">
                         <div class="flex items-center justify-between">
                             <span id="mensual-status-text" class="text-[11px] font-bold text-emerald-300">Meta en proceso</span>
-                            <span id="mensual-porcentaje" class="text-[11px] font-extrabold text-emerald-400">70%</span>
+                            <span id="mensual-porcentaje" class="text-[11px] font-extrabold text-emerald-400">0%</span>
                         </div>
                         <p id="mensual-detalle-faltante" class="text-[10px] text-blue-100 font-medium"></p>
                     </div>
 
                     <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-                        <div>Gerente: <strong id="mensual-gerente-count" class="text-white block text-xs">17</strong></div>
-                        <div>Asesor: <strong id="mensual-asesor-count" class="text-white block text-xs">6</strong></div>
+                        <div>Gerente: <strong id="mensual-gerente-count" class="text-white block text-xs">0</strong></div>
+                        <div>Asesor: <strong id="mensual-asesor-count" class="text-white block text-xs">0</strong></div>
                         <div>Otros: <strong id="mensual-otros-count" class="text-white block text-xs">0</strong></div>
                     </div>
 
-                    <!-- Desglose de Registros (Mes) en Barras de Progreso (Sin porcentajes) -->
                     <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 space-y-2.5">
-                        <span class="text-[11px] font-extrabold text-blue-200 block text-center uppercase tracking-wider">Desglose de Registros (Mes)</span>
-                        <div id="mensual-courses-breakdown" class="space-y-2 text-[11px]">
-                            <!-- Dynamically populated progress bars -->
-                        </div>
+                        <span class="text-[11px] font-extrabold text-blue-200 block text-center uppercase tracking-wider">Desglose de Registros (Ciclo)</span>
+                        <div id="mensual-courses-breakdown" class="space-y-2 text-[11px]"></div>
                     </div>
                 </div>
 
@@ -455,7 +467,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span>Generar Reporte Mensual</span>
+                        <span>Generar Reporte del Ciclo</span>
                     </button>
                 </div>
             </div>
@@ -498,7 +510,6 @@
                     <button onclick="closeHistorialModal()" class="text-slate-400 p-1 hover:text-slate-800 font-bold text-base">&times;</button>
                 </div>
 
-                <!-- Filters Bar -->
                 <div class="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-2xl border text-[11px]">
                     <div>
                         <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Semana</label>
@@ -534,11 +545,9 @@
                 <div class="pt-2 border-t flex justify-between items-center">
                     <div class="flex space-x-1.5">
                         <button onclick="exportHistorial('excel')" class="py-1.5 px-3 bg-emerald-600 text-white rounded-xl text-[11px] font-bold flex items-center space-x-1 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             <span>Excel</span>
                         </button>
                         <button onclick="exportHistorial('pdf')" class="py-1.5 px-3 bg-cncm-red text-white rounded-xl text-[11px] font-bold flex items-center space-x-1 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             <span>PDF</span>
                         </button>
                     </div>
@@ -547,72 +556,58 @@
             </div>
         </div>
 
-        <!-- PRINTABLE PDF HORIZONTAL DASHBOARD (CNCM BRANDED) -->
+        <!-- PRINTABLE PDF HORIZONTAL DASHBOARD -->
         <div id="printable-pdf-dashboard" class="hidden print-only bg-white text-slate-950 p-6 space-y-5 font-sans border-t-8 border-[#0B3B60] w-[950px] mx-auto">
-            <!-- Header -->
             <div class="flex justify-between items-center border-b-2 border-[#0B3B60] pb-4">
                 <div class="flex items-center space-x-3.5">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-[#0B3B60] font-black text-sm shadow-md overflow-hidden p-1.5 border border-blue-100">
-                        <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://www.cncm.edu.mx/images/logo.png'; this.onerror=function(){this.parentElement.innerHTML='<b>CNCM</b>';};">
+                        <img src="https://www.cncm.edu.mx/img/logo.png" alt="CNCM" class="w-full h-full object-contain" crossorigin="anonymous">
                     </div>
                     <div>
                         <h1 class="text-base font-black text-[#0B3B60] uppercase tracking-wide">Grupo Educativo CNCM</h1>
-                        <p class="text-xs text-[#D32F2F] font-extrabold tracking-wider">DASHBOARD INSTITUCIONAL DE RESULTADOS MENSUALES</p>
+                        <p class="text-xs text-[#D32F2F] font-extrabold tracking-wider">REPORTE INSTITUCIONAL DE CICLO MENSUAL</p>
                     </div>
                 </div>
                 <div class="text-right text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border">
                     <p id="pdf-print-date">Fecha: 9/28/2026</p>
-                    <p id="pdf-print-month" class="font-bold text-[#0B3B60]">Mes: Septiembre 2026</p>
+                    <p id="pdf-print-range" class="font-bold text-[#0B3B60]">Periodo: Rango activo</p>
                 </div>
             </div>
 
-            <!-- KPI Cards Row -->
             <div class="grid grid-cols-3 gap-4">
                 <div class="bg-blue-50 border-l-4 border-[#0B3B60] p-4 rounded-xl text-center shadow-sm">
-                    <span class="text-xs text-[#0B3B60] font-extrabold uppercase block">META DEL MES</span>
+                    <span class="text-xs text-[#0B3B60] font-extrabold uppercase block">META DEL CICLO</span>
                     <span id="pdf-meta-mes" class="text-3xl font-black text-[#0B3B60]">33</span>
                     <span class="text-[10px] text-slate-600 font-bold">REGISTROS</span>
                 </div>
                 <div class="bg-red-50 border-l-4 border-[#D32F2F] p-4 rounded-xl text-center shadow-sm">
-                    <span class="text-xs text-[#D32F2F] font-extrabold uppercase block">LOGRADOS DEL MES</span>
-                    <span id="pdf-logrados-mes" class="text-3xl font-black text-[#D32F2F]">23</span>
+                    <span class="text-xs text-[#D32F2F] font-extrabold uppercase block">LOGRADOS DEL CICLO</span>
+                    <span id="pdf-logrados-mes" class="text-3xl font-black text-[#D32F2F]">0</span>
                     <span class="text-[10px] text-slate-600 font-bold">REGISTROS</span>
                 </div>
                 <div class="bg-slate-100 border-l-4 border-slate-700 p-4 rounded-xl text-center shadow-sm">
                     <span class="text-xs text-slate-700 font-extrabold uppercase block">% CUMPLIMIENTO</span>
-                    <span id="pdf-porcentaje-mes" class="text-3xl font-black text-slate-950">70%</span>
+                    <span id="pdf-porcentaje-mes" class="text-3xl font-black text-slate-950">0%</span>
                     <span class="text-[10px] text-slate-600 font-bold">DE LA META</span>
                 </div>
             </div>
 
-            <!-- Progress Bar Section -->
             <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
                 <div class="flex justify-between text-xs font-bold text-[#0B3B60]">
-                    <span>PROGRESO DE META MENSUAL</span>
-                    <span id="pdf-chart-percent">70%</span>
+                    <span>PROGRESO DEL CICLO</span>
+                    <span id="pdf-chart-percent">0%</span>
                 </div>
                 <div class="w-full bg-slate-200 h-5 rounded-full overflow-hidden flex">
-                    <div id="pdf-chart-bar" class="bg-[#0B3B60] h-full transition-all duration-500" style="width: 70%"></div>
+                    <div id="pdf-chart-bar" class="bg-[#0B3B60] h-full transition-all duration-500" style="width: 0%"></div>
                 </div>
-                <div class="text-xs text-slate-700 font-semibold text-right" id="pdf-status-banner">Meta en proceso</div>
             </div>
 
-            <!-- Desglose de Registros (Mes) en PDF -->
             <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
-                <h3 class="text-xs font-extrabold text-[#0B3B60] uppercase tracking-wider">Desglose de Registros (Mes)</h3>
-                <div id="pdf-courses-breakdown" class="space-y-1.5 text-xs">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="pt-3 text-center text-xs text-slate-600 border-t flex justify-between items-center">
-                <span>Grupo Educativo CNCM</span>
-                <span class="text-[#D32F2F] font-bold">Reporte Gerencial Oficial</span>
+                <h3 class="text-xs font-extrabold text-[#0B3B60] uppercase tracking-wider">Desglose de Registros del Ciclo</h3>
+                <div id="pdf-courses-breakdown" class="space-y-1.5 text-xs"></div>
             </div>
         </div>
 
-        <!-- Notification Toast -->
         <div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
             <span id="toast-msg">Acción completada</span>
         </div>
@@ -620,7 +615,6 @@
     </div>
 
     <script>
-        // Historial completo hasta semana 39 e inscripciones previas
         let pendientes = JSON.parse(localStorage.getItem('cncm_pendientes')) || [
             { id: "PEN-1", nombre: "Maria alfaro", telefono: "4641089825", curso: "Curso kids (inglés y computación)", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
             { id: "PEN-2", nombre: "Julian Vidal Garcia", telefono: "4774013824", curso: "Curso kids (inglés y computación)", tipoAtencion: "INFORME", rol: "GERENTE", semana: 39 },
@@ -664,10 +658,9 @@
             { id: "12651", control: "12651", tipoRegistro: "Módulo", nombre: "Cynthia Ramirez Delgado", curso: "Curso kids (inglés y computación)", rol: "GERENTE", fecha: "2026-09-01T09:00:00.000Z", semana: 36 }
         ];
 
-        // Automatic Sunday Week Calculation & Reset Logic (Locked / Non-editable)
         function getCurrentAutomaticWeek() {
             const now = new Date();
-            const refDate = new Date(2026, 8, 28); // Sept 28, 2026 is week 40
+            const refDate = new Date(2026, 8, 28);
             const refWeek = 40;
             const diffTime = now.getTime() - refDate.getTime();
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -679,18 +672,50 @@
         let metaSemanal = parseInt(localStorage.getItem('cncm_meta_semanal')) || 10;
         let metaMensual = parseInt(localStorage.getItem('cncm_meta_mensual')) || 33;
 
+        let fechaInicioCiclo = localStorage.getItem('cncm_ciclo_inicio') || '2026-08-30';
+        let fechaTerminoCiclo = localStorage.getItem('cncm_ciclo_termino') || '2026-09-26';
+
         window.onload = function() {
             document.getElementById('display-numero-semana').innerText = numeroSemana;
             document.getElementById('display-table-week').innerText = numeroSemana;
             document.getElementById('input-meta-semanal').value = metaSemanal;
             document.getElementById('input-meta-mensual').value = metaMensual;
+            document.getElementById('input-fecha-inicio').value = fechaInicioCiclo;
+            document.getElementById('input-fecha-termino').value = fechaTerminoCiclo;
 
+            verificarReinicioSemanalSabado();
             updateMenuCounts();
             updatePendientesList();
             updateRegistrosTable();
             updateReport();
             populateSemanaFilterOptions();
         };
+
+        // Alarma y revisión de cierre de semana los sábados a las 11:59:59 PM
+        function verificarReinicioSemanalSabado() {
+            const now = new Date();
+            const diaSemana = now.getDay(); // 6 es Sábado
+            const horas = now.getHours();
+            const minutos = now.getMinutes();
+            const ultimaAlarma = localStorage.getItem('cncm_ultima_alarma_semana');
+            const hoyStr = now.toDateString();
+
+            // Si es sábado a las 23:59 o domingo temprano y no se ha mostrado la alarma hoy
+            if ((diaSemana === 6 && horas === 23 && minutos >= 59) || (diaSemana === 0 && horas === 0)) {
+                if (ultimaAlarma !== hoyStr) {
+                    localStorage.setItem('cncm_ultima_alarma_semana', hoyStr);
+                    alert("¡Alarma de Reinicio Semanal! Ha concluido la semana este Sábado a las 11:59 PM. Se recomienda descargar el PDF de la semana que termina antes de que inicie el nuevo ciclo.");
+                }
+            }
+        }
+
+        function updateFechasCiclo() {
+            fechaInicioCiclo = document.getElementById('input-fecha-inicio').value;
+            fechaTerminoCiclo = document.getElementById('input-fecha-termino').value;
+            localStorage.setItem('cncm_ciclo_inicio', fechaInicioCiclo);
+            localStorage.setItem('cncm_ciclo_termino', fechaTerminoCiclo);
+            updateReport();
+        }
 
         function updateMetaSemanal(val) {
             metaSemanal = parseInt(val) || 10;
@@ -759,7 +784,7 @@
             } else if(viewName === 'reporte') {
                 document.getElementById('view-reporte').classList.remove('hidden');
                 navRep.className = "flex flex-col items-center text-cncm-red space-y-0.5";
-                document.getElementById('app-subtitle').innerText = "Reportes y Metas Semanales";
+                document.getElementById('app-subtitle').innerText = "Reportes y Metas del Ciclo";
                 updateReport();
             }
             document.getElementById('main-content').scrollTop = 0;
@@ -826,6 +851,15 @@
             showToast('Prospecto guardado en pendientes.');
         }
 
+        // Botón de Cerrado para eliminar prospecto pendiente
+        function cerrarPendiente(id) {
+            pendientes = pendientes.filter(p => p.id !== id);
+            localStorage.setItem('cncm_pendientes', JSON.stringify(pendientes));
+            updateMenuCounts();
+            updatePendientesList();
+            showToast('Prospecto cerrado y eliminado.');
+        }
+
         function updatePendientesList() {
             const container = document.getElementById('pendientes-list-container');
             document.getElementById('badge-pendientes-total').innerText = `${pendientes.length} en total`;
@@ -840,7 +874,7 @@
                 const badgeClass = isInforme ? 'bg-blue-50 text-cncm-blue' : 'bg-orange-50 text-orange-600';
                 return `
                     <div class="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 flex justify-between items-center text-xs">
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5 flex-1 pr-2">
                             <div class="flex items-center space-x-2">
                                 <span class="font-bold text-slate-800 text-xs">${p.nombre}</span>
                                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${badgeClass}">${p.tipoAtencion}</span>
@@ -848,6 +882,7 @@
                             <div class="text-[11px] text-slate-500">Tel: ${p.telefono} • <span class="font-medium text-slate-700">${p.curso}</span></div>
                             <div class="text-[10px] text-slate-500 font-bold">Atendido por: ${p.rol}</div>
                         </div>
+                        <button onclick="cerrarPendiente('${p.id}')" class="px-2.5 py-1 bg-red-100 text-red-600 hover:bg-red-200 rounded-xl font-bold text-[10px] transition shrink-0">Cerrado</button>
                     </div>
                 `;
             }).join('');
@@ -984,12 +1019,11 @@
         function updateReport() {
             document.getElementById('display-numero-semana').innerText = numeroSemana;
 
-            const currentMonthIndex = 8; // September
-            const currentYear = 2026;
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            document.getElementById('current-month-label').innerText = `Nombre del mes: ${monthNames[currentMonthIndex]} ${currentYear}`;
+            const fInicio = new Date(fechaInicioCiclo + 'T00:00:00');
+            const fTermino = new Date(fechaTerminoCiclo + 'T23:59:59');
 
-            // Weekly Metrics
+            document.getElementById('current-month-label').innerText = `Del ${fechaInicioCiclo} al ${fechaTerminoCiclo}`;
+
             const registrosSemana = historialGlobal.filter(h => String(h.semana) === String(numeroSemana));
             const totalLogrados = registrosSemana.length;
             document.getElementById('logrados-valor').innerText = totalLogrados;
@@ -1005,24 +1039,22 @@
                 statusTextSemana.innerText = "Meta Semanal en Proceso";
             }
 
-            // Monthly Metrics for September 2026
-            const registrosMes = historialGlobal.filter(r => {
+            const registrosCiclo = historialGlobal.filter(r => {
                 const d = new Date(r.fecha);
-                return d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
+                return d >= fInicio && d <= fTermino;
             });
 
-            const mensualLogrados = registrosMes.length;
-            document.getElementById('mensual-logrados-valor').innerText = mensualLogrados;
+            const cicloLogrados = registrosCiclo.length;
+            document.getElementById('mensual-logrados-valor').innerText = cicloLogrados;
             
-            const countGerente = registrosMes.filter(r => r.rol.toUpperCase().includes('GERENTE')).length;
-            const countAsesor = registrosMes.filter(r => r.rol.toUpperCase().includes('ASESOR') || r.rol.toUpperCase().includes('EMMANUEL') || r.rol.toUpperCase().includes('WENDY') || r.rol.toUpperCase().includes('RICARDO')).length;
-            const countOtros = Math.max(0, mensualLogrados - countGerente - countAsesor);
+            const countGerente = registrosCiclo.filter(r => r.rol.toUpperCase().includes('GERENTE')).length;
+            const countAsesor = registrosCiclo.filter(r => r.rol.toUpperCase().includes('ASESOR') || r.rol.toUpperCase().includes('EMMANUEL') || r.rol.toUpperCase().includes('WENDY') || r.rol.toUpperCase().includes('RICARDO')).length;
+            const countOtros = Math.max(0, cicloLogrados - countGerente - countAsesor);
 
             document.getElementById('mensual-gerente-count').innerText = countGerente;
             document.getElementById('mensual-asesor-count').innerText = countAsesor;
             document.getElementById('mensual-otros-count').innerText = countOtros;
 
-            // Desglose de Registros (Mes) as Progress Bars (Sin porcentajes)
             const coursesList = [
                 "Prepa Abierta",
                 "Prepa escolarizada",
@@ -1036,8 +1068,8 @@
             
             const breakdownContainer = document.getElementById('mensual-courses-breakdown');
             breakdownContainer.innerHTML = coursesList.map(courseName => {
-                const count = registrosMes.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
-                const maxCount = Math.max(...coursesList.map(c => registrosMes.filter(r => r.curso.toLowerCase().includes(c.toLowerCase())).length), 1);
+                const count = registrosCiclo.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
+                const maxCount = Math.max(...coursesList.map(c => registrosCiclo.filter(r => r.curso.toLowerCase().includes(c.toLowerCase())).length), 1);
                 const barWidth = Math.round((count / maxCount) * 100);
                 return `
                     <div class="space-y-1">
@@ -1052,41 +1084,40 @@
                 `;
             }).join('');
 
-            const porcentajeMes = Math.min(100, Math.round((mensualLogrados / metaMensual) * 100));
+            const porcentajeMes = Math.min(100, Math.round((cicloLogrados / metaMensual) * 100));
             document.getElementById('mensual-porcentaje').innerText = `${porcentajeMes}%`;
 
             const mensualBanner = document.getElementById('mensual-status-banner');
             const mensualStatusText = document.getElementById('mensual-status-text');
             const mensualDetalle = document.getElementById('mensual-detalle-faltante');
 
-            if (mensualLogrados >= metaMensual) {
+            if (cicloLogrados >= metaMensual) {
                 mensualBanner.className = "p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 space-y-1";
                 mensualStatusText.innerText = "Meta alcanzada 🎉";
-                const excedente = mensualLogrados - metaMensual;
+                const excedente = cicloLogrados - metaMensual;
                 if (excedente > 0) {
                     mensualDetalle.innerText = `¡Superado por ${excedente} registro(s)! Meta alcanzada.`;
                 } else {
-                    mensualDetalle.innerText = `Se completaron exactamente los ${metaMensual} registros del mes. Meta alcanzada.`;
+                    mensualDetalle.innerText = `Se completaron exactamente los ${metaMensual} registros del ciclo. Meta alcanzada.`;
                 }
             } else {
                 mensualBanner.className = "p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 space-y-1";
                 mensualStatusText.innerText = "Meta en proceso";
-                const restante = metaMensual - mensualLogrados;
+                const restante = metaMensual - cicloLogrados;
                 mensualDetalle.innerText = `Faltan ${restante} registro(s) para completar la meta de ${metaMensual}. Porcentaje actual: ${porcentajeMes}%.`;
             }
 
-            // Sync hidden printable PDF dashboard data & breakdown
             document.getElementById('pdf-print-date').innerText = `Fecha: ${new Date().toLocaleDateString()}`;
-            document.getElementById('pdf-print-month').innerText = `Mes: ${monthNames[currentMonthIndex]} ${currentYear}`;
+            document.getElementById('pdf-print-range').innerText = `Periodo: ${fechaInicioCiclo} al ${fechaTerminoCiclo}`;
             document.getElementById('pdf-meta-mes').innerText = metaMensual;
-            document.getElementById('pdf-logrados-mes').innerText = mensualLogrados;
+            document.getElementById('pdf-logrados-mes').innerText = cicloLogrados;
             document.getElementById('pdf-porcentaje-mes').innerText = `${porcentajeMes}%`;
             document.getElementById('pdf-chart-percent').innerText = `${porcentajeMes}%`;
             document.getElementById('pdf-chart-bar').style.width = `${porcentajeMes}%`;
 
             const pdfBreakdownContainer = document.getElementById('pdf-courses-breakdown');
             pdfBreakdownContainer.innerHTML = coursesList.map(courseName => {
-                const count = registrosMes.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
+                const count = registrosCiclo.filter(r => r.curso.toLowerCase().includes(courseName.toLowerCase())).length;
                 return `
                     <div class="flex justify-between items-center py-1 border-b border-slate-100">
                         <span class="text-slate-700">${courseName}</span>
